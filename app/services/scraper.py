@@ -1,0 +1,417 @@
+"""
+PWHL Data Scraper
+Fetches player stats, rosters, and game data from public PWHL sources.
+"""
+import asyncio
+import logging
+from datetime import datetime, date
+from typing import Optional
+import aiohttp
+
+logger = logging.getLogger(__name__)
+
+# PWHL HockeyTech API
+STATS_API_BASE = "https://lscluster.hockeytech.com/feed/index.php"
+CLIENT_CODE = "pwhl"
+APP_KEY = "446521baf8c38984"
+LEAGUE_ID = "1"
+SEASON_ID = "8"  # 2024-25 / 2025-26 season
+
+# Static color data keyed by team code from API
+TEAM_COLORS = {
+    "BOS": {"primary_color": "#041E42", "secondary_color": "#B9975B"},
+    "MIN": {"primary_color": "#154734", "secondary_color": "#CFC493"},
+    "MTL": {"primary_color": "#AF1E2D", "secondary_color": "#003DA5"},
+    "NY":  {"primary_color": "#BE2BBB", "secondary_color": "#FFFFFF"},
+    "OTT": {"primary_color": "#DA1A32", "secondary_color": "#000000"},
+    "TOR": {"primary_color": "#00205B", "secondary_color": "#FFFFFF"},
+    "SEA": {"primary_color": "#001D3E", "secondary_color": "#99D9D9"},
+    "VAN": {"primary_color": "#00843D", "secondary_color": "#FFFFFF"},
+}
+
+# Maps API team code -> DB abbreviation
+TEAM_CODE_MAP = {
+    "BOS": "BOS", "MIN": "MIN", "MTL": "MTL",
+    "NY": "NYR", "NYR": "NYR",  # NY Sirens - DB uses "NYR"
+    "OTT": "OTT", "TOR": "TOR",
+    "SEA": "SEA", "VAN": "VAN",
+}
+
+
+async def fetch_json(session: aiohttp.ClientSession, url: str, params: dict = None) -> Optional[dict]:
+    try:
+        async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+            if resp.status == 200:
+                return await resp.json(content_type=None)
+    except Exception as e:
+        logger.error(f"Error fetching {url}: {e}")
+    return None
+
+
+def _base_params() -> dict:
+    return {
+        "feed": "modulekit",
+        "client_code": CLIENT_CODE,
+        "lang": "en",
+        "key": APP_KEY,
+        "league_id": LEAGUE_ID,
+    }
+
+
+async def get_teams_from_api(session: aiohttp.ClientSession) -> list[dict]:
+    """Fetch teams from HockeyTech API."""
+    params = {**_base_params(), "view": "teamsbyseason", "season_id": SEASON_ID}
+    data = await fetch_json(session, STATS_API_BASE, params)
+    if data:
+        return data.get("SiteKit", {}).get("Teamsbyseason", [])
+    return []
+
+
+async def get_player_stats_from_api(session: aiohttp.ClientSession) -> list[dict]:
+    """Fetch skater stats from HockeyTech API."""
+    params = {
+        **_base_params(),
+        "view": "statviewtype",
+        "type": "topscorers",
+        "season_id": SEASON_ID,
+        "limit": "250",
+        "sort": "points",
+        "division_id": "-1",
+        "qualified": "all",
+    }
+    data = await fetch_json(session, STATS_API_BASE, params)
+    if data:
+        return data.get("SiteKit", {}).get("Statviewtype", [])
+    return []
+
+
+async def get_goalie_stats_from_api(session: aiohttp.ClientSession) -> list[dict]:
+    """Fetch goalie stats from HockeyTech API."""
+    params = {
+        **_base_params(),
+        "view": "statviewtype",
+        "type": "goalies",
+        "season_id": SEASON_ID,
+        "limit": "50",
+        "sort": "svpct",
+        "division_id": "-1",
+        "qualified": "all",
+    }
+    data = await fetch_json(session, STATS_API_BASE, params)
+    if data:
+        return data.get("SiteKit", {}).get("Statviewtype", [])
+    return []
+
+
+async def get_scorebar_from_api(session: aiohttp.ClientSession) -> list[dict]:
+    """Fetch all season games via scorebar (schedule view returns 0 games)."""
+    params = {
+        **_base_params(),
+        "view": "scorebar",
+        "numberofdaysahead": "365",
+        "numberofdaysback": "365",
+    }
+    data = await fetch_json(session, STATS_API_BASE, params)
+    if data:
+        return data.get("SiteKit", {}).get("Scorebar", [])
+    return []
+
+
+def _int(val, default=0) -> int:
+    try:
+        return int(val or default)
+    except (ValueError, TypeError):
+        return default
+
+
+def _float(val, default=0.0) -> float:
+    try:
+        return float(val or default)
+    except (ValueError, TypeError):
+        return default
+
+
+def parse_player_from_stats(raw: dict) -> dict:
+    """Parse a player dict from stats API response."""
+    pos = raw.get("position", "F")
+    if pos not in ("F", "C", "LW", "RW", "D", "G"):
+        pos = "F"
+
+    return {
+        "pwhl_player_id": str(raw.get("player_id", "")),
+        "first_name": raw.get("first_name", ""),
+        "last_name": raw.get("last_name", ""),
+        "position": pos,
+        "jersey_number": _int(raw.get("jersey_number", 0)),
+        "team_abbreviation": raw.get("team_code", ""),
+        "nationality": raw.get("birthcntry", ""),
+        "headshot_url": raw.get("photo") or raw.get("player_image", ""),
+        "shoots": raw.get("shoots") or raw.get("catches", ""),
+    }
+
+
+def parse_skater_stats(raw: dict) -> dict:
+    return {
+        "games_played": _int(raw.get("games_played")),
+        "goals": _int(raw.get("goals")),
+        "assists": _int(raw.get("assists")),
+        "points": _int(raw.get("points")),
+        "plus_minus": _int(raw.get("plus_minus")),
+        "penalty_minutes": _int(raw.get("penalty_minutes")),
+        "shots": _int(raw.get("shots")),
+        "hits": _int(raw.get("hits")),
+        "blocks": _int(raw.get("shots_blocked_by_player")),
+        "faceoffs_won": _int(raw.get("faceoff_wins")),
+        "faceoffs_total": _int(raw.get("faceoff_attempts")),
+    }
+
+
+def parse_goalie_stats(raw: dict) -> dict:
+    return {
+        "games_played": _int(raw.get("games_played")),
+        "wins": _int(raw.get("wins")),
+        "losses": _int(raw.get("losses")),
+        "overtime_losses": _int(raw.get("ot_losses")),
+        "saves": _int(raw.get("saves")),
+        "shots_against": _int(raw.get("shots")),
+        "goals_against": _int(raw.get("goals_against")),
+        "shutouts": _int(raw.get("shutouts")),
+        "save_percentage": _float(raw.get("save_percentage")),
+        "goals_against_average": _float(raw.get("goals_against_average")),
+    }
+
+
+def parse_game_status(g: dict) -> str:
+    status_str = g.get("GameStatusString", "").lower()
+    if "final" in status_str:
+        return "final"
+    if "progress" in status_str or "live" in status_str or "intermission" in status_str:
+        return "live"
+    return "scheduled"
+
+
+async def run_full_scrape(db) -> dict:
+    """Run a full scrape and update the database."""
+    from app.models.team import PWHLTeam
+    from app.models.player import Player, PlayerStats
+    from app.models.game import Game
+
+    results = {"teams": 0, "players": 0, "stats": 0, "games": 0, "errors": []}
+
+    async with aiohttp.ClientSession() as session:
+        # --- Teams ---
+        try:
+            api_teams = await get_teams_from_api(session)
+            for t in api_teams:
+                code = t.get("code", "")
+                db_abbr = TEAM_CODE_MAP.get(code, code)
+                colors = TEAM_COLORS.get(code, {})
+                logo_url = t.get("team_logo_url", "")
+
+                existing = db.query(PWHLTeam).filter_by(abbreviation=db_abbr).first()
+                if not existing:
+                    team = PWHLTeam(
+                        name=t.get("name", ""),
+                        city=t.get("city", ""),
+                        abbreviation=db_abbr,
+                        logo_url=logo_url,
+                        primary_color=colors.get("primary_color"),
+                        secondary_color=colors.get("secondary_color"),
+                    )
+                    db.add(team)
+                    results["teams"] += 1
+                else:
+                    # Update logo and colors if missing
+                    if logo_url and not existing.logo_url:
+                        existing.logo_url = logo_url
+                    if colors.get("primary_color") and not existing.primary_color:
+                        existing.primary_color = colors["primary_color"]
+                    if colors.get("secondary_color") and not existing.secondary_color:
+                        existing.secondary_color = colors["secondary_color"]
+                    results["teams"] += 1
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Teams scrape: {e}")
+            logger.error(f"Teams scrape error: {e}", exc_info=True)
+
+        teams_by_abbr = {t.abbreviation: t for t in db.query(PWHLTeam).all()}
+
+        def get_team(code: str):
+            mapped = TEAM_CODE_MAP.get(code, code)
+            return teams_by_abbr.get(mapped)
+
+        # --- Skater stats ---
+        try:
+            skater_data = await get_player_stats_from_api(session)
+            for raw in skater_data:
+                player_info = parse_player_from_stats(raw)
+                player_stats = parse_skater_stats(raw)
+
+                player = db.query(Player).filter_by(
+                    pwhl_player_id=player_info["pwhl_player_id"]
+                ).first()
+
+                team_abbr = player_info.pop("team_abbreviation", "")
+                pwhl_team = get_team(team_abbr)
+
+                if not player:
+                    player = Player(**player_info, pwhl_team_id=pwhl_team.id if pwhl_team else None)
+                    db.add(player)
+                else:
+                    for k, v in player_info.items():
+                        setattr(player, k, v)
+                    if pwhl_team:
+                        player.pwhl_team_id = pwhl_team.id
+                results["players"] += 1
+
+                db.flush()
+
+                stat = db.query(PlayerStats).filter_by(
+                    player_id=player.id, season="2025-2026", is_season_total=True
+                ).first()
+                if not stat:
+                    stat = PlayerStats(
+                        player_id=player.id,
+                        season="2025-2026",
+                        is_season_total=True,
+                        **player_stats,
+                    )
+                    db.add(stat)
+                else:
+                    for k, v in player_stats.items():
+                        setattr(stat, k, v)
+
+                from app.services.scoring import calculate_fantasy_points_default
+                stat.fantasy_points = calculate_fantasy_points_default(stat, player.position)
+                results["stats"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Skater scrape: {e}")
+            logger.error(f"Skater scrape error: {e}", exc_info=True)
+
+        # --- Goalie stats ---
+        try:
+            goalie_data = await get_goalie_stats_from_api(session)
+            for raw in goalie_data:
+                player_info = parse_player_from_stats(raw)
+                player_info["position"] = "G"
+                goalie_stats = parse_goalie_stats(raw)
+
+                player = db.query(Player).filter_by(
+                    pwhl_player_id=player_info["pwhl_player_id"]
+                ).first()
+
+                team_abbr = player_info.pop("team_abbreviation", "")
+                pwhl_team = get_team(team_abbr)
+
+                if not player:
+                    player = Player(**player_info, pwhl_team_id=pwhl_team.id if pwhl_team else None)
+                    db.add(player)
+                    results["players"] += 1
+                else:
+                    player.position = "G"
+                    if pwhl_team:
+                        player.pwhl_team_id = pwhl_team.id
+
+                db.flush()
+
+                stat = db.query(PlayerStats).filter_by(
+                    player_id=player.id, season="2025-2026", is_season_total=True
+                ).first()
+                if not stat:
+                    stat = PlayerStats(
+                        player_id=player.id,
+                        season="2025-2026",
+                        is_season_total=True,
+                        **goalie_stats,
+                    )
+                    db.add(stat)
+                else:
+                    for k, v in goalie_stats.items():
+                        setattr(stat, k, v)
+
+                from app.services.scoring import calculate_fantasy_points_default
+                stat.fantasy_points = calculate_fantasy_points_default(stat, "G")
+                results["stats"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Goalie scrape: {e}")
+            logger.error(f"Goalie scrape error: {e}", exc_info=True)
+
+        # --- Games (via scorebar) ---
+        try:
+            scorebar = await get_scorebar_from_api(session)
+            for g in scorebar:
+                game_id = str(g.get("ID", ""))
+                if not game_id:
+                    continue
+
+                home_code = g.get("HomeCode", "")
+                away_code = g.get("VisitorCode", "")
+                home_team = get_team(home_code)
+                away_team = get_team(away_code)
+
+                raw_date = g.get("Date", "")
+                try:
+                    game_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
+                except Exception:
+                    continue
+
+                raw_iso = g.get("GameDateISO8601", "")
+                game_time = None
+                if raw_iso:
+                    try:
+                        # Parse ISO8601 with offset e.g. "2026-01-25T15:00:00-05:00"
+                        game_time = datetime.fromisoformat(raw_iso)
+                    except Exception:
+                        pass
+
+                status = parse_game_status(g)
+                period_str = g.get("Period", "0")
+                period = _int(period_str) if period_str else None
+                game_clock = g.get("GameClock", "")
+
+                # Detect OT/SO from period name
+                period_name = g.get("PeriodNameShort", "")
+                is_overtime = period_name in ("OT", "4")
+                is_shootout = period_name in ("SO", "5")
+
+                existing = db.query(Game).filter_by(pwhl_game_id=game_id).first()
+                if not existing:
+                    game = Game(
+                        pwhl_game_id=game_id,
+                        season="2025-2026",
+                        game_date=game_date,
+                        game_time=game_time,
+                        home_team_id=home_team.id if home_team else None,
+                        away_team_id=away_team.id if away_team else None,
+                        home_score=_int(g.get("HomeGoals", 0)),
+                        away_score=_int(g.get("VisitorGoals", 0)),
+                        status=status,
+                        period=period,
+                        time_remaining=game_clock,
+                        is_overtime=is_overtime,
+                        is_shootout=is_shootout,
+                        venue=g.get("venue_name", ""),
+                    )
+                    db.add(game)
+                else:
+                    existing.status = status
+                    existing.home_score = _int(g.get("HomeGoals", 0))
+                    existing.away_score = _int(g.get("VisitorGoals", 0))
+                    existing.period = period
+                    existing.time_remaining = game_clock
+                    existing.is_overtime = is_overtime
+                    existing.is_shootout = is_shootout
+                    if game_time:
+                        existing.game_time = game_time
+                results["games"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Games scrape: {e}")
+            logger.error(f"Games scrape error: {e}", exc_info=True)
+
+    return results
