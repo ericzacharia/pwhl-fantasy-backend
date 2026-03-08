@@ -16,12 +16,176 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS waivers_player_drop_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS waivers_player_add_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS waivers_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS waivers_fantasy_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.two_factor_setups DROP CONSTRAINT IF EXISTS two_factor_setups_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trades DROP CONSTRAINT IF EXISTS trades_receiving_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trades DROP CONSTRAINT IF EXISTS trades_proposing_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trades DROP CONSTRAINT IF EXISTS trades_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trade_items DROP CONSTRAINT IF EXISTS trade_items_trade_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trade_items DROP CONSTRAINT IF EXISTS trade_items_to_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trade_items DROP CONSTRAINT IF EXISTS trade_items_player_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.trade_items DROP CONSTRAINT IF EXISTS trade_items_from_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_settings DROP CONSTRAINT IF EXISTS scoring_settings_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.players DROP CONSTRAINT IF EXISTS players_pwhl_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.player_stats DROP CONSTRAINT IF EXISTS player_stats_player_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.player_stats DROP CONSTRAINT IF EXISTS player_stats_game_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_commissioner_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_members DROP CONSTRAINT IF EXISTS league_members_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_members DROP CONSTRAINT IF EXISTS league_members_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_invites DROP CONSTRAINT IF EXISTS league_invites_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.games DROP CONSTRAINT IF EXISTS games_home_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.games DROP CONSTRAINT IF EXISTS games_away_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.game_events DROP CONSTRAINT IF EXISTS game_events_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.game_events DROP CONSTRAINT IF EXISTS game_events_player_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.game_events DROP CONSTRAINT IF EXISTS game_events_game_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.fantasy_teams DROP CONSTRAINT IF EXISTS fantasy_teams_owner_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.fantasy_teams DROP CONSTRAINT IF EXISTS fantasy_teams_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.fantasy_rosters DROP CONSTRAINT IF EXISTS fantasy_rosters_player_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.fantasy_rosters DROP CONSTRAINT IF EXISTS fantasy_rosters_fantasy_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.draft_sessions DROP CONSTRAINT IF EXISTS draft_sessions_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.draft_picks DROP CONSTRAINT IF EXISTS draft_picks_player_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.draft_picks DROP CONSTRAINT IF EXISTS draft_picks_league_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.draft_picks DROP CONSTRAINT IF EXISTS draft_picks_fantasy_team_id_fkey;
+DROP INDEX IF EXISTS public.ix_waivers_league_id;
+DROP INDEX IF EXISTS public.ix_waivers_id;
+DROP INDEX IF EXISTS public.ix_users_username;
+DROP INDEX IF EXISTS public.ix_users_id;
+DROP INDEX IF EXISTS public.ix_users_email;
+DROP INDEX IF EXISTS public.ix_two_factor_setups_id;
+DROP INDEX IF EXISTS public.ix_trades_league_id;
+DROP INDEX IF EXISTS public.ix_trades_id;
+DROP INDEX IF EXISTS public.ix_trade_items_id;
+DROP INDEX IF EXISTS public.ix_scoring_settings_id;
+DROP INDEX IF EXISTS public.ix_pwhl_teams_id;
+DROP INDEX IF EXISTS public.ix_players_pwhl_player_id;
+DROP INDEX IF EXISTS public.ix_players_id;
+DROP INDEX IF EXISTS public.ix_player_stats_player_id;
+DROP INDEX IF EXISTS public.ix_player_stats_id;
+DROP INDEX IF EXISTS public.ix_news_articles_id;
+DROP INDEX IF EXISTS public.ix_leagues_id;
+DROP INDEX IF EXISTS public.ix_league_members_id;
+DROP INDEX IF EXISTS public.ix_league_invites_id;
+DROP INDEX IF EXISTS public.ix_games_pwhl_game_id;
+DROP INDEX IF EXISTS public.ix_games_id;
+DROP INDEX IF EXISTS public.ix_game_events_id;
+DROP INDEX IF EXISTS public.ix_game_events_game_id;
+DROP INDEX IF EXISTS public.ix_fantasy_teams_id;
+DROP INDEX IF EXISTS public.ix_fantasy_rosters_player_id;
+DROP INDEX IF EXISTS public.ix_fantasy_rosters_id;
+DROP INDEX IF EXISTS public.ix_fantasy_rosters_fantasy_team_id;
+DROP INDEX IF EXISTS public.ix_draft_sessions_id;
+DROP INDEX IF EXISTS public.ix_draft_picks_league_id;
+DROP INDEX IF EXISTS public.ix_draft_picks_id;
+DROP INDEX IF EXISTS public.ix_device_profiles_user_id;
+DROP INDEX IF EXISTS public.ix_device_profiles_id;
+DROP INDEX IF EXISTS public.ix_device_profiles_device_id;
+DROP INDEX IF EXISTS public.ix_analytics_events_user_id;
+DROP INDEX IF EXISTS public.ix_analytics_events_session_id;
+DROP INDEX IF EXISTS public.ix_analytics_events_id;
+DROP INDEX IF EXISTS public.ix_analytics_events_event_type;
+DROP INDEX IF EXISTS public.ix_analytics_events_created_at;
+ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS waivers_pkey;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_pkey;
+ALTER TABLE IF EXISTS ONLY public.two_factor_setups DROP CONSTRAINT IF EXISTS two_factor_setups_user_id_key;
+ALTER TABLE IF EXISTS ONLY public.two_factor_setups DROP CONSTRAINT IF EXISTS two_factor_setups_pkey;
+ALTER TABLE IF EXISTS ONLY public.trades DROP CONSTRAINT IF EXISTS trades_pkey;
+ALTER TABLE IF EXISTS ONLY public.trade_items DROP CONSTRAINT IF EXISTS trade_items_pkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_settings DROP CONSTRAINT IF EXISTS scoring_settings_pkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_settings DROP CONSTRAINT IF EXISTS scoring_settings_league_id_key;
+ALTER TABLE IF EXISTS ONLY public.pwhl_teams DROP CONSTRAINT IF EXISTS pwhl_teams_pkey;
+ALTER TABLE IF EXISTS ONLY public.pwhl_teams DROP CONSTRAINT IF EXISTS pwhl_teams_abbreviation_key;
+ALTER TABLE IF EXISTS ONLY public.players DROP CONSTRAINT IF EXISTS players_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_stats DROP CONSTRAINT IF EXISTS player_stats_pkey;
+ALTER TABLE IF EXISTS ONLY public.news_articles DROP CONSTRAINT IF EXISTS news_articles_url_key;
+ALTER TABLE IF EXISTS ONLY public.news_articles DROP CONSTRAINT IF EXISTS news_articles_pkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_pkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_invite_code_key;
+ALTER TABLE IF EXISTS ONLY public.league_members DROP CONSTRAINT IF EXISTS league_members_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_invites DROP CONSTRAINT IF EXISTS league_invites_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_invites DROP CONSTRAINT IF EXISTS league_invites_invite_code_key;
+ALTER TABLE IF EXISTS ONLY public.games DROP CONSTRAINT IF EXISTS games_pkey;
+ALTER TABLE IF EXISTS ONLY public.game_events DROP CONSTRAINT IF EXISTS game_events_pkey;
+ALTER TABLE IF EXISTS ONLY public.fantasy_teams DROP CONSTRAINT IF EXISTS fantasy_teams_pkey;
+ALTER TABLE IF EXISTS ONLY public.fantasy_rosters DROP CONSTRAINT IF EXISTS fantasy_rosters_pkey;
+ALTER TABLE IF EXISTS ONLY public.draft_sessions DROP CONSTRAINT IF EXISTS draft_sessions_pkey;
+ALTER TABLE IF EXISTS ONLY public.draft_sessions DROP CONSTRAINT IF EXISTS draft_sessions_league_id_key;
+ALTER TABLE IF EXISTS ONLY public.draft_picks DROP CONSTRAINT IF EXISTS draft_picks_pkey;
+ALTER TABLE IF EXISTS ONLY public.device_profiles DROP CONSTRAINT IF EXISTS device_profiles_pkey;
+ALTER TABLE IF EXISTS ONLY public.analytics_events DROP CONSTRAINT IF EXISTS analytics_events_pkey;
+ALTER TABLE IF EXISTS ONLY public.alembic_version DROP CONSTRAINT IF EXISTS alembic_version_pkc;
+ALTER TABLE IF EXISTS public.waivers ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.two_factor_setups ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.trades ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.trade_items ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.scoring_settings ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.pwhl_teams ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.players ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.player_stats ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.news_articles ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.leagues ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.league_members ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.league_invites ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.games ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.game_events ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.fantasy_teams ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.fantasy_rosters ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.draft_sessions ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.draft_picks ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.device_profiles ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.analytics_events ALTER COLUMN id DROP DEFAULT;
+DROP SEQUENCE IF EXISTS public.waivers_id_seq;
+DROP TABLE IF EXISTS public.waivers;
+DROP SEQUENCE IF EXISTS public.users_id_seq;
+DROP TABLE IF EXISTS public.users;
+DROP SEQUENCE IF EXISTS public.two_factor_setups_id_seq;
+DROP TABLE IF EXISTS public.two_factor_setups;
+DROP SEQUENCE IF EXISTS public.trades_id_seq;
+DROP TABLE IF EXISTS public.trades;
+DROP SEQUENCE IF EXISTS public.trade_items_id_seq;
+DROP TABLE IF EXISTS public.trade_items;
+DROP SEQUENCE IF EXISTS public.scoring_settings_id_seq;
+DROP TABLE IF EXISTS public.scoring_settings;
+DROP SEQUENCE IF EXISTS public.pwhl_teams_id_seq;
+DROP TABLE IF EXISTS public.pwhl_teams;
+DROP SEQUENCE IF EXISTS public.players_id_seq;
+DROP TABLE IF EXISTS public.players;
+DROP SEQUENCE IF EXISTS public.player_stats_id_seq;
+DROP TABLE IF EXISTS public.player_stats;
+DROP SEQUENCE IF EXISTS public.news_articles_id_seq;
+DROP TABLE IF EXISTS public.news_articles;
+DROP SEQUENCE IF EXISTS public.leagues_id_seq;
+DROP TABLE IF EXISTS public.leagues;
+DROP SEQUENCE IF EXISTS public.league_members_id_seq;
+DROP TABLE IF EXISTS public.league_members;
+DROP SEQUENCE IF EXISTS public.league_invites_id_seq;
+DROP TABLE IF EXISTS public.league_invites;
+DROP SEQUENCE IF EXISTS public.games_id_seq;
+DROP TABLE IF EXISTS public.games;
+DROP SEQUENCE IF EXISTS public.game_events_id_seq;
+DROP TABLE IF EXISTS public.game_events;
+DROP SEQUENCE IF EXISTS public.fantasy_teams_id_seq;
+DROP TABLE IF EXISTS public.fantasy_teams;
+DROP SEQUENCE IF EXISTS public.fantasy_rosters_id_seq;
+DROP TABLE IF EXISTS public.fantasy_rosters;
+DROP SEQUENCE IF EXISTS public.draft_sessions_id_seq;
+DROP TABLE IF EXISTS public.draft_sessions;
+DROP SEQUENCE IF EXISTS public.draft_picks_id_seq;
+DROP TABLE IF EXISTS public.draft_picks;
+DROP SEQUENCE IF EXISTS public.device_profiles_id_seq;
+DROP TABLE IF EXISTS public.device_profiles;
+DROP SEQUENCE IF EXISTS public.analytics_events_id_seq;
+DROP TABLE IF EXISTS public.analytics_events;
+DROP TABLE IF EXISTS public.alembic_version;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: alembic_version; Type: TABLE; Schema: public; Owner: eric
+-- Name: alembic_version; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.alembic_version (
@@ -29,10 +193,8 @@ CREATE TABLE public.alembic_version (
 );
 
 
-ALTER TABLE public.alembic_version OWNER TO eric;
-
 --
--- Name: analytics_events; Type: TABLE; Schema: public; Owner: eric
+-- Name: analytics_events; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.analytics_events (
@@ -56,10 +218,8 @@ CREATE TABLE public.analytics_events (
 );
 
 
-ALTER TABLE public.analytics_events OWNER TO eric;
-
 --
--- Name: analytics_events_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: analytics_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.analytics_events_id_seq
@@ -71,17 +231,15 @@ CREATE SEQUENCE public.analytics_events_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.analytics_events_id_seq OWNER TO eric;
-
 --
--- Name: analytics_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: analytics_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.analytics_events_id_seq OWNED BY public.analytics_events.id;
 
 
 --
--- Name: device_profiles; Type: TABLE; Schema: public; Owner: eric
+-- Name: device_profiles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.device_profiles (
@@ -102,10 +260,8 @@ CREATE TABLE public.device_profiles (
 );
 
 
-ALTER TABLE public.device_profiles OWNER TO eric;
-
 --
--- Name: device_profiles_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: device_profiles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.device_profiles_id_seq
@@ -117,17 +273,15 @@ CREATE SEQUENCE public.device_profiles_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.device_profiles_id_seq OWNER TO eric;
-
 --
--- Name: device_profiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: device_profiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.device_profiles_id_seq OWNED BY public.device_profiles.id;
 
 
 --
--- Name: draft_picks; Type: TABLE; Schema: public; Owner: eric
+-- Name: draft_picks; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.draft_picks (
@@ -144,10 +298,8 @@ CREATE TABLE public.draft_picks (
 );
 
 
-ALTER TABLE public.draft_picks OWNER TO eric;
-
 --
--- Name: draft_picks_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: draft_picks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.draft_picks_id_seq
@@ -159,17 +311,15 @@ CREATE SEQUENCE public.draft_picks_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.draft_picks_id_seq OWNER TO eric;
-
 --
--- Name: draft_picks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: draft_picks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.draft_picks_id_seq OWNED BY public.draft_picks.id;
 
 
 --
--- Name: draft_sessions; Type: TABLE; Schema: public; Owner: eric
+-- Name: draft_sessions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.draft_sessions (
@@ -186,10 +336,8 @@ CREATE TABLE public.draft_sessions (
 );
 
 
-ALTER TABLE public.draft_sessions OWNER TO eric;
-
 --
--- Name: draft_sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: draft_sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.draft_sessions_id_seq
@@ -201,17 +349,15 @@ CREATE SEQUENCE public.draft_sessions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.draft_sessions_id_seq OWNER TO eric;
-
 --
--- Name: draft_sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: draft_sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.draft_sessions_id_seq OWNED BY public.draft_sessions.id;
 
 
 --
--- Name: fantasy_rosters; Type: TABLE; Schema: public; Owner: eric
+-- Name: fantasy_rosters; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.fantasy_rosters (
@@ -226,10 +372,8 @@ CREATE TABLE public.fantasy_rosters (
 );
 
 
-ALTER TABLE public.fantasy_rosters OWNER TO eric;
-
 --
--- Name: fantasy_rosters_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: fantasy_rosters_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.fantasy_rosters_id_seq
@@ -241,17 +385,15 @@ CREATE SEQUENCE public.fantasy_rosters_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.fantasy_rosters_id_seq OWNER TO eric;
-
 --
--- Name: fantasy_rosters_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: fantasy_rosters_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.fantasy_rosters_id_seq OWNED BY public.fantasy_rosters.id;
 
 
 --
--- Name: fantasy_teams; Type: TABLE; Schema: public; Owner: eric
+-- Name: fantasy_teams; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.fantasy_teams (
@@ -271,10 +413,8 @@ CREATE TABLE public.fantasy_teams (
 );
 
 
-ALTER TABLE public.fantasy_teams OWNER TO eric;
-
 --
--- Name: fantasy_teams_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: fantasy_teams_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.fantasy_teams_id_seq
@@ -286,17 +426,15 @@ CREATE SEQUENCE public.fantasy_teams_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.fantasy_teams_id_seq OWNER TO eric;
-
 --
--- Name: fantasy_teams_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: fantasy_teams_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.fantasy_teams_id_seq OWNED BY public.fantasy_teams.id;
 
 
 --
--- Name: game_events; Type: TABLE; Schema: public; Owner: eric
+-- Name: game_events; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.game_events (
@@ -312,10 +450,8 @@ CREATE TABLE public.game_events (
 );
 
 
-ALTER TABLE public.game_events OWNER TO eric;
-
 --
--- Name: game_events_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: game_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.game_events_id_seq
@@ -327,17 +463,15 @@ CREATE SEQUENCE public.game_events_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.game_events_id_seq OWNER TO eric;
-
 --
--- Name: game_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: game_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.game_events_id_seq OWNED BY public.game_events.id;
 
 
 --
--- Name: games; Type: TABLE; Schema: public; Owner: eric
+-- Name: games; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.games (
@@ -361,10 +495,8 @@ CREATE TABLE public.games (
 );
 
 
-ALTER TABLE public.games OWNER TO eric;
-
 --
--- Name: games_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: games_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.games_id_seq
@@ -376,17 +508,15 @@ CREATE SEQUENCE public.games_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.games_id_seq OWNER TO eric;
-
 --
--- Name: games_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: games_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.games_id_seq OWNED BY public.games.id;
 
 
 --
--- Name: league_invites; Type: TABLE; Schema: public; Owner: eric
+-- Name: league_invites; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.league_invites (
@@ -400,10 +530,8 @@ CREATE TABLE public.league_invites (
 );
 
 
-ALTER TABLE public.league_invites OWNER TO eric;
-
 --
--- Name: league_invites_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: league_invites_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.league_invites_id_seq
@@ -415,17 +543,15 @@ CREATE SEQUENCE public.league_invites_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.league_invites_id_seq OWNER TO eric;
-
 --
--- Name: league_invites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: league_invites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.league_invites_id_seq OWNED BY public.league_invites.id;
 
 
 --
--- Name: league_members; Type: TABLE; Schema: public; Owner: eric
+-- Name: league_members; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.league_members (
@@ -437,10 +563,8 @@ CREATE TABLE public.league_members (
 );
 
 
-ALTER TABLE public.league_members OWNER TO eric;
-
 --
--- Name: league_members_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: league_members_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.league_members_id_seq
@@ -452,17 +576,15 @@ CREATE SEQUENCE public.league_members_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.league_members_id_seq OWNER TO eric;
-
 --
--- Name: league_members_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: league_members_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.league_members_id_seq OWNED BY public.league_members.id;
 
 
 --
--- Name: leagues; Type: TABLE; Schema: public; Owner: eric
+-- Name: leagues; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.leagues (
@@ -488,10 +610,8 @@ CREATE TABLE public.leagues (
 );
 
 
-ALTER TABLE public.leagues OWNER TO eric;
-
 --
--- Name: leagues_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: leagues_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.leagues_id_seq
@@ -503,17 +623,15 @@ CREATE SEQUENCE public.leagues_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.leagues_id_seq OWNER TO eric;
-
 --
--- Name: leagues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: leagues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.leagues_id_seq OWNED BY public.leagues.id;
 
 
 --
--- Name: news_articles; Type: TABLE; Schema: public; Owner: eric
+-- Name: news_articles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.news_articles (
@@ -530,10 +648,8 @@ CREATE TABLE public.news_articles (
 );
 
 
-ALTER TABLE public.news_articles OWNER TO eric;
-
 --
--- Name: news_articles_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: news_articles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.news_articles_id_seq
@@ -545,17 +661,15 @@ CREATE SEQUENCE public.news_articles_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.news_articles_id_seq OWNER TO eric;
-
 --
--- Name: news_articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: news_articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.news_articles_id_seq OWNED BY public.news_articles.id;
 
 
 --
--- Name: player_stats; Type: TABLE; Schema: public; Owner: eric
+-- Name: player_stats; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.player_stats (
@@ -591,10 +705,8 @@ CREATE TABLE public.player_stats (
 );
 
 
-ALTER TABLE public.player_stats OWNER TO eric;
-
 --
--- Name: player_stats_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: player_stats_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.player_stats_id_seq
@@ -606,17 +718,15 @@ CREATE SEQUENCE public.player_stats_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.player_stats_id_seq OWNER TO eric;
-
 --
--- Name: player_stats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: player_stats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.player_stats_id_seq OWNED BY public.player_stats.id;
 
 
 --
--- Name: players; Type: TABLE; Schema: public; Owner: eric
+-- Name: players; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.players (
@@ -639,10 +749,8 @@ CREATE TABLE public.players (
 );
 
 
-ALTER TABLE public.players OWNER TO eric;
-
 --
--- Name: players_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: players_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.players_id_seq
@@ -654,17 +762,15 @@ CREATE SEQUENCE public.players_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.players_id_seq OWNER TO eric;
-
 --
--- Name: players_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: players_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.players_id_seq OWNED BY public.players.id;
 
 
 --
--- Name: pwhl_teams; Type: TABLE; Schema: public; Owner: eric
+-- Name: pwhl_teams; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.pwhl_teams (
@@ -681,10 +787,8 @@ CREATE TABLE public.pwhl_teams (
 );
 
 
-ALTER TABLE public.pwhl_teams OWNER TO eric;
-
 --
--- Name: pwhl_teams_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: pwhl_teams_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.pwhl_teams_id_seq
@@ -696,17 +800,15 @@ CREATE SEQUENCE public.pwhl_teams_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.pwhl_teams_id_seq OWNER TO eric;
-
 --
--- Name: pwhl_teams_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: pwhl_teams_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.pwhl_teams_id_seq OWNED BY public.pwhl_teams.id;
 
 
 --
--- Name: scoring_settings; Type: TABLE; Schema: public; Owner: eric
+-- Name: scoring_settings; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.scoring_settings (
@@ -729,10 +831,8 @@ CREATE TABLE public.scoring_settings (
 );
 
 
-ALTER TABLE public.scoring_settings OWNER TO eric;
-
 --
--- Name: scoring_settings_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: scoring_settings_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.scoring_settings_id_seq
@@ -744,17 +844,15 @@ CREATE SEQUENCE public.scoring_settings_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.scoring_settings_id_seq OWNER TO eric;
-
 --
--- Name: scoring_settings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: scoring_settings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.scoring_settings_id_seq OWNED BY public.scoring_settings.id;
 
 
 --
--- Name: trade_items; Type: TABLE; Schema: public; Owner: eric
+-- Name: trade_items; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.trade_items (
@@ -766,10 +864,8 @@ CREATE TABLE public.trade_items (
 );
 
 
-ALTER TABLE public.trade_items OWNER TO eric;
-
 --
--- Name: trade_items_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: trade_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.trade_items_id_seq
@@ -781,17 +877,15 @@ CREATE SEQUENCE public.trade_items_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.trade_items_id_seq OWNER TO eric;
-
 --
--- Name: trade_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: trade_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.trade_items_id_seq OWNED BY public.trade_items.id;
 
 
 --
--- Name: trades; Type: TABLE; Schema: public; Owner: eric
+-- Name: trades; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.trades (
@@ -806,10 +900,8 @@ CREATE TABLE public.trades (
 );
 
 
-ALTER TABLE public.trades OWNER TO eric;
-
 --
--- Name: trades_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: trades_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.trades_id_seq
@@ -821,17 +913,15 @@ CREATE SEQUENCE public.trades_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.trades_id_seq OWNER TO eric;
-
 --
--- Name: trades_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: trades_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.trades_id_seq OWNED BY public.trades.id;
 
 
 --
--- Name: two_factor_setups; Type: TABLE; Schema: public; Owner: eric
+-- Name: two_factor_setups; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.two_factor_setups (
@@ -844,10 +934,8 @@ CREATE TABLE public.two_factor_setups (
 );
 
 
-ALTER TABLE public.two_factor_setups OWNER TO eric;
-
 --
--- Name: two_factor_setups_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: two_factor_setups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.two_factor_setups_id_seq
@@ -859,17 +947,15 @@ CREATE SEQUENCE public.two_factor_setups_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.two_factor_setups_id_seq OWNER TO eric;
-
 --
--- Name: two_factor_setups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: two_factor_setups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.two_factor_setups_id_seq OWNED BY public.two_factor_setups.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: eric
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.users (
@@ -885,10 +971,8 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO eric;
-
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -900,17 +984,15 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO eric;
-
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: waivers; Type: TABLE; Schema: public; Owner: eric
+-- Name: waivers; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.waivers (
@@ -927,10 +1009,8 @@ CREATE TABLE public.waivers (
 );
 
 
-ALTER TABLE public.waivers OWNER TO eric;
-
 --
--- Name: waivers_id_seq; Type: SEQUENCE; Schema: public; Owner: eric
+-- Name: waivers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.waivers_id_seq
@@ -942,164 +1022,162 @@ CREATE SEQUENCE public.waivers_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.waivers_id_seq OWNER TO eric;
-
 --
--- Name: waivers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: eric
+-- Name: waivers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.waivers_id_seq OWNED BY public.waivers.id;
 
 
 --
--- Name: analytics_events id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: analytics_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.analytics_events ALTER COLUMN id SET DEFAULT nextval('public.analytics_events_id_seq'::regclass);
 
 
 --
--- Name: device_profiles id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: device_profiles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.device_profiles ALTER COLUMN id SET DEFAULT nextval('public.device_profiles_id_seq'::regclass);
 
 
 --
--- Name: draft_picks id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: draft_picks id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_picks ALTER COLUMN id SET DEFAULT nextval('public.draft_picks_id_seq'::regclass);
 
 
 --
--- Name: draft_sessions id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: draft_sessions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_sessions ALTER COLUMN id SET DEFAULT nextval('public.draft_sessions_id_seq'::regclass);
 
 
 --
--- Name: fantasy_rosters id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: fantasy_rosters id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_rosters ALTER COLUMN id SET DEFAULT nextval('public.fantasy_rosters_id_seq'::regclass);
 
 
 --
--- Name: fantasy_teams id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: fantasy_teams id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_teams ALTER COLUMN id SET DEFAULT nextval('public.fantasy_teams_id_seq'::regclass);
 
 
 --
--- Name: game_events id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: game_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_events ALTER COLUMN id SET DEFAULT nextval('public.game_events_id_seq'::regclass);
 
 
 --
--- Name: games id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: games id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.games ALTER COLUMN id SET DEFAULT nextval('public.games_id_seq'::regclass);
 
 
 --
--- Name: league_invites id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: league_invites id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_invites ALTER COLUMN id SET DEFAULT nextval('public.league_invites_id_seq'::regclass);
 
 
 --
--- Name: league_members id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: league_members id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_members ALTER COLUMN id SET DEFAULT nextval('public.league_members_id_seq'::regclass);
 
 
 --
--- Name: leagues id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: leagues id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.leagues ALTER COLUMN id SET DEFAULT nextval('public.leagues_id_seq'::regclass);
 
 
 --
--- Name: news_articles id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: news_articles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.news_articles ALTER COLUMN id SET DEFAULT nextval('public.news_articles_id_seq'::regclass);
 
 
 --
--- Name: player_stats id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: player_stats id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_stats ALTER COLUMN id SET DEFAULT nextval('public.player_stats_id_seq'::regclass);
 
 
 --
--- Name: players id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: players id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.players ALTER COLUMN id SET DEFAULT nextval('public.players_id_seq'::regclass);
 
 
 --
--- Name: pwhl_teams id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: pwhl_teams id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.pwhl_teams ALTER COLUMN id SET DEFAULT nextval('public.pwhl_teams_id_seq'::regclass);
 
 
 --
--- Name: scoring_settings id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: scoring_settings id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scoring_settings ALTER COLUMN id SET DEFAULT nextval('public.scoring_settings_id_seq'::regclass);
 
 
 --
--- Name: trade_items id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: trade_items id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trade_items ALTER COLUMN id SET DEFAULT nextval('public.trade_items_id_seq'::regclass);
 
 
 --
--- Name: trades id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: trades id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trades ALTER COLUMN id SET DEFAULT nextval('public.trades_id_seq'::regclass);
 
 
 --
--- Name: two_factor_setups id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: two_factor_setups id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.two_factor_setups ALTER COLUMN id SET DEFAULT nextval('public.two_factor_setups_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: waivers id; Type: DEFAULT; Schema: public; Owner: eric
+-- Name: waivers id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.waivers ALTER COLUMN id SET DEFAULT nextval('public.waivers_id_seq'::regclass);
 
 
 --
--- Data for Name: alembic_version; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: alembic_version; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
@@ -1108,7 +1186,7 @@ COPY public.alembic_version (version_num) FROM stdin;
 
 
 --
--- Data for Name: analytics_events; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: analytics_events; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.analytics_events (id, user_id, event_type, endpoint, screen, properties, ip_address, user_agent, app_version, os_version, device_model, device_id, locale, timezone, network_type, session_id, created_at) FROM stdin;
@@ -2234,11 +2312,71 @@ COPY public.analytics_events (id, user_id, event_type, endpoint, screen, propert
 1120	\N	api_call	GET /api/v1/fantasy/my-teams	\N	{"status": 200, "duration_ms": 17}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-07 11:11:30.400714-05
 1121	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	8DE390BC-F1F0-408C-ADBC-62A772FB28A8	2026-03-07 11:25:29.28987-05
 1122	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 4}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-07 11:25:29.420961-05
+1123	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	578ACB1F-5C2B-4C08-ABC2-5FECD0E81BD2	2026-03-08 00:56:43.825956-05
+1124	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 9}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:43.832058-05
+1125	\N	api_call	GET /api/v1/auth/me	\N	{"status": 401, "duration_ms": 1}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:43.904456-05
+1126	\N	api_call	POST /api/v1/auth/refresh	\N	{"status": 200, "duration_ms": 4}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:43.925732-05
+1127	\N	api_call	GET /api/v1/auth/me	\N	{"status": 200, "duration_ms": 4}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:43.94533-05
+1128	\N	screen_view	\N	Home	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	578ACB1F-5C2B-4C08-ABC2-5FECD0E81BD2	2026-03-08 00:56:44.078697-05
+1129	\N	api_call	GET /api/v1/pwhl/news	\N	{"status": 200, "duration_ms": 5}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:44.086869-05
+1130	\N	api_call	GET /api/v1/fantasy/my-teams	\N	{"status": 200, "duration_ms": 6}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:44.095926-05
+1131	\N	api_call	GET /api/v1/leagues	\N	{"status": 200, "duration_ms": 7}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 00:56:44.097379-05
+1132	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	91C4E491-5C4D-4224-97CE-A8D3A9DCEA7E	2026-03-08 10:48:38.492718-04
+1133	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.500131-04
+1134	\N	screen_view	\N	Home	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	91C4E491-5C4D-4224-97CE-A8D3A9DCEA7E	2026-03-08 10:48:38.646772-04
+1135	\N	api_call	GET /api/v1/fantasy/my-teams	\N	{"status": 401, "duration_ms": 3}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.701269-04
+1136	\N	api_call	GET /api/v1/pwhl/news	\N	{"status": 200, "duration_ms": 10}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.709682-04
+1137	\N	api_call	GET /api/v1/auth/me	\N	{"status": 401, "duration_ms": 12}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.712468-04
+1138	\N	api_call	GET /api/v1/leagues	\N	{"status": 401, "duration_ms": 14}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.714039-04
+1139	\N	api_call	POST /api/v1/auth/refresh	\N	{"status": 200, "duration_ms": 4}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.72081-04
+1140	\N	api_call	POST /api/v1/auth/refresh	\N	{"status": 200, "duration_ms": 3}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.731811-04
+1141	\N	api_call	POST /api/v1/auth/refresh	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.736456-04
+1142	\N	api_call	GET /api/v1/auth/me	\N	{"status": 200, "duration_ms": 6}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.754943-04
+1143	\N	api_call	GET /api/v1/fantasy/my-teams	\N	{"status": 200, "duration_ms": 21}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.759421-04
+1144	\N	api_call	GET /api/v1/leagues	\N	{"status": 200, "duration_ms": 12}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:38.761226-04
+1146	\N	api_call	GET /api/v1/players/seasons	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:41.186199-04
+1145	\N	screen_view	\N	PWHL	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	91C4E491-5C4D-4224-97CE-A8D3A9DCEA7E	2026-03-08 10:48:41.102266-04
+1147	\N	api_call	GET /api/v1/players	\N	{"status": 200, "duration_ms": 34}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:48:41.235445-04
+1149	\N	api_call	GET /api/v1/leagues/public	\N	{"status": 200, "duration_ms": 9}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:45.638477-04
+1152	\N	api_call	GET /api/v1/players/seasons	\N	{"status": 200, "duration_ms": 3}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:46.395666-04
+1154	\N	api_call	GET /api/v1/pwhl/standings	\N	{"status": 200, "duration_ms": 16}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:47.366456-04
+1156	\N	api_call	GET /api/v1/games	\N	{"status": 200, "duration_ms": 25}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:49.660366-04
+1158	\N	api_call	GET /api/v1/pwhl/standings	\N	{"status": 200, "duration_ms": 10}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:19.493238-04
+1160	\N	screen_view	\N	Leagues	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	91C4E491-5C4D-4224-97CE-A8D3A9DCEA7E	2026-03-08 10:50:21.221753-04
+1162	\N	api_call	GET /api/v1/leagues/1/teams	\N	{"status": 200, "duration_ms": 7}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:26.563833-04
+1164	\N	api_call	GET /api/v1/leagues	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:28.572804-04
+1166	\N	api_call	GET /api/v1/leagues/17/teams/170/roster	\N	{"status": 200, "duration_ms": 21}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:37.167228-04
+1168	\N	api_call	GET /api/v1/leagues/public	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:48.789653-04
+1171	\N	screen_view	\N	Home	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	26204C9B-BC6E-4F6A-9837-195E7D13F043	2026-03-08 10:54:14.003764-04
+1174	\N	screen_view	\N	Home	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	42D9F77E-7BC2-4B6B-A417-E5993436792D	2026-03-08 11:13:07.407685-04
+1177	\N	screen_view	\N	Home	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	0EDAF42C-DE43-4F4A-8A5E-D8D82D1280F2	2026-03-08 11:13:32.921903-04
+1181	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	B0C8B7E9-334F-4CF6-BEC9-FE06529375E9	2026-03-08 11:34:59.696052-04
+1148	\N	screen_view	\N	Leagues	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	91C4E491-5C4D-4224-97CE-A8D3A9DCEA7E	2026-03-08 10:49:45.565339-04
+1150	\N	api_call	GET /api/v1/leagues	\N	{"status": 200, "duration_ms": 10}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:45.639519-04
+1161	\N	api_call	GET /api/v1/leagues	\N	{"status": 200, "duration_ms": 7}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:21.226501-04
+1163	\N	api_call	GET /api/v1/leagues/public	\N	{"status": 200, "duration_ms": 9}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:28.565366-04
+1165	\N	api_call	GET /api/v1/leagues/17/teams	\N	{"status": 200, "duration_ms": 6}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:30.461138-04
+1179	\N	screen_view	\N	Leagues	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	0EDAF42C-DE43-4F4A-8A5E-D8D82D1280F2	2026-03-08 11:14:33.587436-04
+1182	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 133}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 11:34:59.833193-04
+1151	\N	screen_view	\N	PWHL	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	91C4E491-5C4D-4224-97CE-A8D3A9DCEA7E	2026-03-08 10:49:46.374893-04
+1153	\N	api_call	GET /api/v1/players	\N	{"status": 200, "duration_ms": 29}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:46.434751-04
+1157	\N	api_call	GET /api/v1/pwhl/games/upcoming	\N	{"status": 200, "duration_ms": 14}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:13.414366-04
+1159	\N	api_call	GET /api/v1/leagues/public	\N	{"status": 200, "duration_ms": 5}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:21.203742-04
+1167	\N	api_call	GET /api/v1/leagues	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:50:48.788587-04
+1170	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 4}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:54:10.599084-04
+1173	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 8}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 11:13:07.300821-04
+1176	\N	api_call	POST /api/v1/analytics/device	\N	{"status": 200, "duration_ms": 4}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 11:13:29.685201-04
+1180	\N	screen_view	\N	More	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	0EDAF42C-DE43-4F4A-8A5E-D8D82D1280F2	2026-03-08 11:14:35.210743-04
+1155	\N	api_call	GET /api/v1/games	\N	{"status": 200, "duration_ms": 24}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	\N	\N	\N	\N	\N	\N	\N	\N	2026-03-08 10:49:49.658816-04
+1169	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	26204C9B-BC6E-4F6A-9837-195E7D13F043	2026-03-08 10:54:10.446632-04
+1172	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	42D9F77E-7BC2-4B6B-A417-E5993436792D	2026-03-08 11:13:07.292779-04
+1175	\N	app_open	\N	\N	{"cold_start": true}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	0EDAF42C-DE43-4F4A-8A5E-D8D82D1280F2	2026-03-08 11:13:29.542042-04
+1178	\N	screen_view	\N	PWHL	{}	10.0.0.85	PWHLFantasy/1 CFNetwork/3860.400.51 Darwin/25.3.0	1.0	iOS 26.3.1	iPhone17,1	E6770D60-3C51-41CD-9F48-6396EF891B1C	en_US	America/New_York	\N	0EDAF42C-DE43-4F4A-8A5E-D8D82D1280F2	2026-03-08 11:14:30.946618-04
 \.
 
 
 --
--- Data for Name: device_profiles; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: device_profiles; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.device_profiles (id, user_id, device_id, device_model, os_version, app_version, locale, timezone, carrier, screen_width, screen_height, push_token, last_seen, created_at) FROM stdin;
@@ -2247,7 +2385,7 @@ COPY public.device_profiles (id, user_id, device_id, device_model, os_version, a
 
 
 --
--- Data for Name: draft_picks; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: draft_picks; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.draft_picks (id, league_id, fantasy_team_id, player_id, pick_number, round_number, pick_in_round, is_made, made_at, created_at) FROM stdin;
@@ -2295,7 +2433,7 @@ COPY public.draft_picks (id, league_id, fantasy_team_id, player_id, pick_number,
 
 
 --
--- Data for Name: draft_sessions; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: draft_sessions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.draft_sessions (id, league_id, status, current_pick_number, total_picks, pick_time_limit, current_pick_started_at, started_at, completed_at, created_at) FROM stdin;
@@ -2304,7 +2442,7 @@ COPY public.draft_sessions (id, league_id, status, current_pick_number, total_pi
 
 
 --
--- Data for Name: fantasy_rosters; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: fantasy_rosters; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.fantasy_rosters (id, fantasy_team_id, player_id, slot, position_slot, acquired_via, acquired_at, is_active) FROM stdin;
@@ -4337,7 +4475,7 @@ COPY public.fantasy_rosters (id, fantasy_team_id, player_id, slot, position_slot
 
 
 --
--- Data for Name: fantasy_teams; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: fantasy_teams; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.fantasy_teams (id, name, owner_id, league_id, total_points, wins, losses, ties, waiver_priority, faab_budget, logo_url, created_at, updated_at) FROM stdin;
@@ -4503,7 +4641,7 @@ COPY public.fantasy_teams (id, name, owner_id, league_id, total_points, wins, lo
 
 
 --
--- Data for Name: game_events; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: game_events; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.game_events (id, game_id, event_type, period, time_in_period, player_id, team_id, description, created_at) FROM stdin;
@@ -4511,7 +4649,7 @@ COPY public.game_events (id, game_id, event_type, period, time_in_period, player
 
 
 --
--- Data for Name: games; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: games; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.games (id, pwhl_game_id, season, game_date, game_time, home_team_id, away_team_id, home_score, away_score, status, period, time_remaining, is_overtime, is_shootout, venue, created_at, updated_at) FROM stdin;
@@ -4849,7 +4987,7 @@ COPY public.games (id, pwhl_game_id, season, game_date, game_time, home_team_id,
 
 
 --
--- Data for Name: league_invites; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: league_invites; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.league_invites (id, league_id, email, invite_code, is_used, created_at, expires_at) FROM stdin;
@@ -4857,7 +4995,7 @@ COPY public.league_invites (id, league_id, email, invite_code, is_used, created_
 
 
 --
--- Data for Name: league_members; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: league_members; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.league_members (id, league_id, user_id, role, joined_at) FROM stdin;
@@ -4904,7 +5042,7 @@ COPY public.league_members (id, league_id, user_id, role, joined_at) FROM stdin;
 
 
 --
--- Data for Name: leagues; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: leagues; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.leagues (id, name, commissioner_id, invite_code, max_teams, is_public, draft_type, draft_status, draft_order, current_draft_pick, season, roster_size, active_roster_size, ir_slots, waiver_type, trade_deadline, is_active, created_at, updated_at) FROM stdin;
@@ -4931,7 +5069,7 @@ COPY public.leagues (id, name, commissioner_id, invite_code, max_teams, is_publi
 
 
 --
--- Data for Name: news_articles; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: news_articles; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.news_articles (id, title, url, thumbnail, fallback_image, date_str, summary, scraped_at, team_logos, player_image_url) FROM stdin;
@@ -5028,7 +5166,9 @@ COPY public.news_articles (id, title, url, thumbnail, fallback_image, date_str, 
 60	NOV. 28: MINNESOTA AT SEATTLE PRE-GAME PRIMER - Professional Women's Hockey League (PWHL)	https://news.google.com/rss/articles/CBMilwFBVV95cUxQamxRSFU0QkdHaWRrWXJfOC1FSWpKTEJUakdINmtoM2JfdlJKYTNhU1RJblRzR3Z5d3h4YzA3R2Yta3F6UmV5d2JsRUl3b1prdjhSWGhEdzY3V0xYeVVvQlVGbjBEX3M1Vm1IVlE3Mi1uTEwwckRRd21jdjM0cTJzbEtROFNIejEybFJwUWprZ01CLUV1QXNN?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/11.4-new-SEA-t_-_SGT_matchup_-_1200x800_-vs-_MIN?_a=DATAg1ZSZAA0	\N	2025-11-28T08:00:00+0000	\N	2026-03-05 21:43:18.945319-05	["https://assets.leaguestat.com/pwhl/logos/2.png", "https://assets.leaguestat.com/pwhl/logos/7.png"]	\N
 63	MINNESOTA FROST ANNOUNCE 2025-26 ROSTER - Professional Women's Hockey League (PWHL)	https://news.google.com/rss/articles/CBMirwFBVV95cUxPVlkyQWJ1ZWsxTDI1cy1wN20tNkpvVHZramhPWDVlYnFaa3E5RWdiVFBfanBTdlRPRmZxaHIzc2dUYXBWbE8tNE9aUU5abnNzUU1CTHE5UEFPdnhMVVhhUTRTQUhGX1doREJVMkhSUlBwM2VoemlDeFhFWHFYaF9GbEVrOXhYNXhGeTRWSWZDcmRZZllRNzdlTzJpOTh6bGVsdVI1OTNid2Q2V0M4S2Nj?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/2526-SOC-MINN-OpeningGameRoster-1200x800-2?_a=DATAg1ZSZAA0	\N	2025-11-20T08:00:00+0000	\N	2026-03-05 21:43:18.945319-05	["https://assets.leaguestat.com/pwhl/logos/2.png"]	\N
 356	PWHL UNVEILS EXPANSION TEAM IDENTITIES: SEATTLE TORRENT AND VANCOUVER GOLDENEYES	https://news.google.com/rss/articles/CBMixwFBVV95cUxNcEhKWGwwMlNLWnFmT3hfRTE1ZXNxSllmTnZ0d09vSVMxVHlIMXhsLVJ0OF82TGJIRHRkbVVkdHBHQlpibGkwM0pkbGFIWFhBVnJ5Y3dPTHhVR1RtQk9nRy1qTlNwN0Z1bnBpNVBnaEx5LXdIN1I5ZkZMNHcxQ3dlb1FleS1JRVVBUFVXczVQRXJ0QlZjUC1fTnAzcUd2QVVHMnFLTDNUVVMtQ04yNDZocTlKUFRfM3o5eEI2Q1huaUlVTEw3Z204?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/2526-BrandLaunch-Lockup-Header-PressRelease-1200x800_1?_a=DATAg1ZSZAA0	\N	2025-11-06T08:00:00+0000	\N	2026-03-05 21:43:18.945319-05	["https://assets.leaguestat.com/pwhl/logos/7.png", "https://assets.leaguestat.com/pwhl/logos/8.png"]	\N
+404	MAR. 8: MINNESOTA AT TORONTO PRE-GAME PRIMER	https://www.thepwhl.com/en/news/2026/march/07/mar-8-minnesota-at-toronto-pre-game-primer	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/CREDIT_PWHL_-_MIN_at_TOR_-_Dec._30_20255?_a=DATAg1ZSZAA0	\N	2026-03-07T23:00:00Z	\N	2026-03-07 21:29:46.378682-05	["https://assets.leaguestat.com/pwhl/logos/2.png", "https://assets.leaguestat.com/pwhl/logos/6.png"]	\N
 80	MINNESOTA FROST TO HOST OLYMPIC WATCH PARTIES THROUGHOUT OLYMPIC WINTER GAMES MILANO CORTINA 2026	https://www.thepwhl.com/en/news/2026/february/06/minnesota-frost-to-host-olympic-watch-parties-throughout-olympic-winter-games-milano-cortina-2026	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/MIN-OlympicsWatchParty-1920x1080_5?_a=DATAg1ZSZAA0	\N	2026-02-06	\N	2026-03-05 14:42:23.88156-05	["https://assets.leaguestat.com/pwhl/logos/2.png"]	\N
+405	MAR. 8: MINNESOTA AT TORONTO PRE-GAME PRIMER - Professional Women's Hockey League (PWHL)	https://news.google.com/rss/articles/CBMikgFBVV95cUxPcnExZkRfa2czVnJFTUx2YVp6a0F1SzhwZDNuV1NSNFA2bmJ2THpkWnpFMDJ3clZzWFpDMXhWNWgtZjZqanRpTmVFcms2TFBXTDFabFo2M1RvSjBNWnZJZjVQeUFFVXBmellqSTd0ZWN3MXBBbWZDYVc3blZDbHhfeF9pdkswTktSakViMjVXZ3NVZw?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/CREDIT_PWHL_-_MIN_at_TOR_-_Dec._30_20255?_a=DATAg1ZSZAA0	\N	2026-03-07T23:23:37+0000	\N	2026-03-07 21:29:46.855761-05	["https://assets.leaguestat.com/pwhl/logos/2.png", "https://assets.leaguestat.com/pwhl/logos/6.png"]	\N
 5	PWHL TEAMS SELL OUT BOTH MADISON SQUARE GARDEN AND TD GARDENMadison Square Garden – April 4 – New York Sirens vs. Seattle Torrent TD Garden – April 11 – Boston Fleet vs. Montréal Victoire New York Sirens’ first-ever home game at Madison Square Garden, presented by Title Partner, e.l.f. Cosmetics, could set new ...Mar 05, 2026	https://www.thepwhl.com/en/news/2026/march/05/pwhl-teams-sell-out-madison-square-garden-td-garden	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/2526-SOC-GardenSellOut-16x9?_a=DATAg1ZSZAA0	\N	2026-03-05T10:00:00-05:00	\N	2026-03-05 14:27:52.469454-05	["https://assets.leaguestat.com/pwhl/logos/1.png", "https://assets.leaguestat.com/pwhl/logos/3.png"]	\N
 64	Eight Dates to Watch in the first half of the PWHL Schedule	https://www.thepwhl.com/en/news/2025/october/17/eight-dates-to-watch-in-the-first-half-of-the-pwhl-schedule	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/_37A5739?_a=DATAg1ZSZAA0	\N	2025-10-17	\N	2026-03-05 14:42:21.653214-05	\N	\N
 68	DESBIENS STUMPS FROST AS VICTOIRE TAKE OVER FIRST PLACE	https://www.thepwhl.com/en/news/2026/march/01/DESBIENS-STUMPS-FROST-AS-VICTOIRE-TAKE-OVER-FIRST-PLACE	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/CREDIT_PWHL_-_MIN_at_MTL_-_Mar._1_2026_21?_a=DATAg1ZSZAA0	\N	2026-03-01	\N	2026-03-05 16:42:28.232253-05	["https://assets.leaguestat.com/pwhl/logos/2.png", "https://assets.leaguestat.com/pwhl/logos/3.png"]	https://assets.leaguestat.com/pwhl/240x240/28.jpg
@@ -5081,6 +5221,7 @@ COPY public.news_articles (id, title, url, thumbnail, fallback_image, date_str, 
 123	USA RECORDS FIVE GOALS FOR A THIRD STRAIGHT GAME TO HANDLE SWITZERLAND AND STAY UNDEFEATED IN PRELIMINARY ROUND	https://www.thepwhl.com/en/news/2026/february/09/usa-records-five-goals-for-a-third-straight-game-as-they-handle-switzerland-to-stay-undefeated-in-the-preliminary-round	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/DOC06774?_a=DATAg1ZSZAA0	\N	2026-02-09T17:08:59-05:00	\N	2026-03-05 14:42:27.473675-05	\N	\N
 125	PWHL NOTEBOOK: OLYMPIC WINTER GAMES EDITION, FEB. 9	https://www.thepwhl.com/en/news/2026/february/09/pwhl-notebook-olympic-winter-games-edition-feb-9	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Canada_Goal_vs_Czechia?_a=DATAg1ZSZAA0	\N	2026-02-09	\N	2026-03-05 14:42:29.236786-05	\N	\N
 126	GERMANY LEAPFROGS ITALY IN GROUP B WITH 2-1 WIN AS BOTH TEAMS QUALIFY FOR THE KNOCKOUT STAGE	https://www.thepwhl.com/en/news/2026/february/10/germany-leapfrogs-italy-in-the-group-b-standings-with-a-2-1-win-as-both-teams-qualify-for-the-knockout-stage	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/20260122_BOS_OlympicsEDITS_013_1?_a=DATAg1ZSZAA0	\N	2026-02-10T16:23:23-05:00	\N	2026-03-05 14:42:29.236786-05	\N	\N
+406	Minnesota's Madison Kaiser Hopes To Make An Impact, Beginning With The 2026 PWHL Draft - The Hockey News	https://news.google.com/rss/articles/CBMiyAFBVV95cUxNUlVCU0VZSS00dzNQRVJKSVVRa0UwT2JDaWZiUmJQWmxpNFdDNHlSYTNBQ1Z0eF9rY0M4dVV6dUdSRVJmWk4wVnhON1ZNOXZxU2psY1ZZSHFDUWFpeXRubEVabVNyS0hsNk5idHo1RVh4bm9jblhnQWR2UkQ4MV9QaHdrSUhoTGRIQU5veVphVVA3NjA1bVgtcDR6VkdqYWZBamJQTmtXZW1oeUxsckFWaGUyNTNlcHl3WTFUZzRfaHJBSUFFM2l6ZA?oc=5	https://deweb-519a7.b-cdn.net/post-images/d8e3dd36-1794-475d-9827-be7688f9aa68.webp	\N	2026-03-07T22:34:09+0000	\N	2026-03-08 01:29:46.733612-05	["https://assets.leaguestat.com/pwhl/logos/2.png"]	\N
 128	CANADA HOLDS SWITZERLAND TO SIX SHOTS ON GOAL AS REIGNING OLYMPIC CHAMPIONS WIN OPENING MATCH IN MILANO CORTINA	https://www.thepwhl.com/en/news/2026/february/07/canada-holds-switzerland-to-just-six-shots-on-goal-as-the-reigning-olympic-champions-win-their-opening-match-in-milano-cortina	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/XUJ09697?_a=DATAg1ZSZAA0	\N	2026-02-07T17:40:07-05:00	\N	2026-03-05 14:42:29.236786-05	\N	\N
 129	PWHL NOTEBOOK: OLYMPIC WINTER GAMES EDITION, FEB. 8	https://www.thepwhl.com/en/news/2026/february/08/pwhl-notebook-olympic-winter-games-edition-feb-8	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Mlynkova_Czechia_Feb82026?_a=DATAg1ZSZAA0	\N	2026-02-08	\N	2026-03-05 14:42:29.236786-05	\N	\N
 130	CZECHIA RIDES TWO FIRST-PERIOD GOALS TO TAKE DOWN FINLAND 2-0	https://www.thepwhl.com/en/news/2026/february/08/czechia-rides-two-first-period-goals-to-take-down-finland-2-0	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/cze_fin_recap?_a=DATAg1ZSZAA0	\N	2026-02-08T17:56:37-05:00	\N	2026-03-05 14:42:29.236786-05	\N	\N
@@ -5142,6 +5283,7 @@ COPY public.news_articles (id, title, url, thumbnail, fallback_image, date_str, 
 203	PWHL WEEKLY NOTEBOOK: JAN. 19, 2026	https://www.thepwhl.com/en/news/2026/january/19/pwhl-weekly-notebook-jan-19-2026	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Sirens_DC_JR22352?_a=DATAg1ZSZAA0	\N	2026-01-19	\N	2026-03-05 14:42:35.004215-05	\N	\N
 204	PWHL PLAYER SAFETY COMMITTEE DISCIPLINARY ACTION: JAN. 19, 2026	https://www.thepwhl.com/en/news/2026/january/19/pwhl-player-safety-committee-disciplinary-action-jan-19-2026	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Player_Safety_-_Headline_-_16x9_2?_a=DATAg1ZSZAA0	\N	2026-01-19	\N	2026-03-05 14:42:35.947099-05	\N	\N
 206	JAN. 18: PWHL TAKEOVER TOUR MONTRÉAL VS. NEW YORK PRE-GAME PRIMER	https://www.thepwhl.com/en/news/2026/january/18/jan-18-pwhl-takeover-tour-montreal-vs-new-york-pre-game-primer	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/ToT-DC-0118-1200x800-with-BJs-logo?_a=DATAg1ZSZAA0	\N	2026-01-18	\N	2026-03-05 14:42:35.947099-05	["https://assets.leaguestat.com/pwhl/logos/3.png", "https://assets.leaguestat.com/pwhl/logos/4.png"]	\N
+407	VICTOIRE ELEVATE GIAQUINTO AND NADEAU TO ACTIVE ROSTER, PLACE AMBROSE ON LTIR AND LIST POULIN DAY-TO-DAY - Professional Women's Hockey League (PWHL)	https://news.google.com/rss/articles/CBMihgJBVV95cUxQUmpUSnl6Y1Y4T3R3N01vT3VWY1puS29DSXdlV0QxRUwwYXNfY1FyVndnN1hpRTlCaDNldUtYc3lrRGdxS3B3ZUM0aGhLNnhUNjBiYy1qanQ3b0dFTlhEUGpiTldvRzJNeHN5bHdZZ3FleDNIT2k0OEE1em9sQlg1dUFCN3BOaGtoN05CNnF2R1duTVpkTDUwaW1ocXpIRWFramJEWGh6RlkzVzNwOGhDX09qbF9QWHNyMnBRRTVVRDE5SmlkMk1pUEhxN19oN3V2ZlQtSC1FcE9JN2tkS0w2SU94Y3JydzNFZjNIbEZ6ejZHSTFQYTliRHRIX0R3SndwUm8ydjRn?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/52d01c04-f2b3-45e9-8e2d-f20e3a3cf93720260104-MINvMTL-LCA00292_1?_a=DATAg1ZSZAA0	\N	2026-02-26T08:00:00+0000	\N	2026-03-08 06:29:50.829458-04	["https://assets.leaguestat.com/pwhl/logos/3.png"]	\N
 208	PWHL BREAKS U.S. WOMEN'S HOCKEY ATTENDANCE RECORD AT CAPITAL ONE ARENA IN WASHINGTON, D.C.	https://www.thepwhl.com/en/news/2026/january/18/pwhl-breaks-us-womens-hockey-attendance-record-at-capital-one-arena-in-washington-dc	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/1200x800DC_Final?_a=DATAg1ZSZAA0	\N	2026-01-18	\N	2026-03-05 14:42:35.947099-05	\N	\N
 209	FROST SILENCE SIRENS IN 3-2 OVERTIME VICTORY	https://www.thepwhl.com/en/news/2026/january/16/frost-silence-sirens-in-3-2-overtime-victory	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/CREDIT_PWHL_-_MIN_at_NY_-_Jan._16_2026_01?_a=DATAg1ZSZAA0	\N	2026-01-16	\N	2026-03-05 14:42:35.947099-05	["https://assets.leaguestat.com/pwhl/logos/2.png", "https://assets.leaguestat.com/pwhl/logos/4.png"]	\N
 211	BEGINNER'S GUIDE TO THE PWHL	https://www.thepwhl.com/en/news/2025/april/18/pwhl-beginners-guide	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/League-BeginnersGuide-Slide1-1200x800?_a=DATAg1ZSZAA0	\N	2026-01-16	\N	2026-03-05 14:42:35.947099-05	\N	\N
@@ -5155,9 +5297,11 @@ COPY public.news_articles (id, title, url, thumbnail, fallback_image, date_str, 
 221	JAN. 13: OTTAWA AT MONTRÉAL PRE-GAME PRIMER	https://www.thepwhl.com/en/news/2026/january/13/jan-13-ottawa-at-montreal-pre-game-primer	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/v2-20250129-OTTvMTL-LCA00218?_a=DATAg1ZSZAA0	\N	2026-01-13	\N	2026-03-05 14:42:36.720898-05	["https://assets.leaguestat.com/pwhl/logos/3.png", "https://assets.leaguestat.com/pwhl/logos/5.png"]	\N
 222	PWHL PLAYER SAFETY COMMITTEE DISCIPLINARY ACTION: JAN. 13, 2026	https://www.thepwhl.com/en/news/2026/january/13/pwhl-player-safety-committee-disciplinary-action-jan-13-2026	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Player_Safety_-_Headline_-_16x9_2?_a=DATAg1ZSZAA0	\N	2026-01-13	\N	2026-03-05 14:42:36.720898-05	\N	\N
 223	JAN. 11: PWHL TAKEOVER TOUR OTTAWA VS. BOSTON PRE-GAME PRIMER	https://www.thepwhl.com/en/news/2026/january/11/jan-11-pwhl-takeover-tour-ottawa-vs-boston-pre-game-primer	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/12.30.25-Takeover-Tour-Halifax-2-1200x800?_a=DATAg1ZSZAA0	\N	2026-01-11	\N	2026-03-05 14:42:36.720898-05	["https://assets.leaguestat.com/pwhl/logos/1.png", "https://assets.leaguestat.com/pwhl/logos/5.png"]	\N
+409	FLEET SIGN MIA BIOTTI TO 10-DAY CONTRACT - Professional Women's Hockey League (PWHL)	https://news.google.com/rss/articles/CBMiqwFBVV95cUxORUx5WlVjX0hZTWdVX2xtZGNsZVM1TzlWWWxQejlSaW9ZamNsbEpabTZjVjBoa0lPSVdvTmRSVmQ4ODAtS0lGQ0ZGUVc5M1BZc294NnZDTEozS3NablptZjd2SUlpNlBzMlN3WVE1TjdXc0tSbWhRbFZyZmd6Vjh4YlR5TXJFaV9lZU12NkdNOUVUamVmOGFLZ0J5LUsyT2NZZmZseEpPdDdyUUU?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Player_Signing_-_16x9?_a=DATAg1ZSZAA0	\N	2026-01-03T08:00:00+0000	\N	2026-03-08 10:29:50.40146-04	["https://assets.leaguestat.com/pwhl/logos/1.png"]	\N
 355	PWHL WEEKLY NOTEBOOK: JAN. 12, 2026	https://news.google.com/rss/articles/CBMihwFBVV95cUxQNkFjSUs1NnJBYjdjZlpkbHFXM2dXR05ISUVOYVRKVDJoczlJdkNlSC1yRVVhNzcza1JIUm5XczZMVGZZVGtBOGdUQjhWLVNQaXRncElucHgzR3RTM2R3dkRYVy1SZmVUS0tQTERDaWYxdFgtUDhNSE9MMlBCVnR6cm5Ma0hzUU0?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/Takeover_Tour_Quebec_City_Crowd?_a=DATAg1ZSZAA0	\N	2026-01-12T08:00:00+0000	\N	2026-03-05 21:43:09.505869-05	\N	\N
 354	PWHL SEATTLE UNVEILS INAUGURAL SEASON SCHEDULE	https://news.google.com/rss/articles/CBMiqwFBVV95cUxNR0NFUkJsbzI5MGJRX21DaFYyd1Zva2hpZ3p1NXdGMm05eXNDMzV3Zi11MlpGT3F1RlZFX0V6VjZ2Tk1uSVNqTnNSLUR6a0hqUnAxQUlQOWxPVEZFWWVUMnU5cDZDYTBjbmhpUnFvN0c2T1Z5Q0IyczI2Y2M2c3FKSFU4UDlCbHgxcml6Sm1TT19XMEpxTnhSbXg3d3BFaWxLd0dHVWo1MW55aGc?oc=5	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/PWHL-seattle-SEA-Schedule-1200x800?_a=DATAg1ZSZAA0	\N	2025-10-01T07:00:00+0000	\N	2026-03-05 21:43:18.945319-05	["https://assets.leaguestat.com/pwhl/logos/7.png"]	\N
 370	PWHL Players Association strengthens voice by affiliating with AFL-CIO and its 15 million workers - Midland Daily News	https://news.google.com/rss/articles/CBMiogFBVV95cUxNNVJJejVSVlFLUUE4NEo3dWNIOVNZLU9zS2tNeWJqdDVtTDdzNXQyclp0SG9uR2lES0pJVmVrVy1nM0t5MWlkb0RPRlI1TmVNYXMxa19wSFg1c1Ria04yVlFjVWw1dThud1B4VURmUmUybzZld0J1TEdCbDlyNGhVc1FMLW45MmpwWkI4WDFTUS1Sd0JEVmxDY1RuLUZaSVRhUnc?oc=5	\N	\N	2026-03-05T20:13:30+0000	\N	2026-03-06 09:45:10.457739-05	\N	\N
+408	PWHL Players Association strengthens voice by affiliating with AFL-CIO and its 15 million workers - WFMZ.com	https://news.google.com/rss/articles/CBMipAJBVV95cUxQZWRwblRvNmdMM2JHS0RHanVFTGJkekRFUF9XTmFmb1FYaVdsN09zYnJteXNrWVp0N2N4bFZKWFRMMHNGOFhsbngxN2JYMWk3X2c1Z0dhVnI2RVU5M3RpT0ZCTnZDMzdkSUZBbTZCeW44cXdzUm5vcW44ZWxjM244TUM4SFRZbjh1M0x4UTRIWkFiQjV4UTdHN2RTclJfZnAwYkNYTGc0alNqOTQ0SGxzcXoxd0FXTWdaR2hOTERZNkdCU3dla0NEaDg0ZFBtUTNiWTY5V0QtZ005em5fRmlIV1llcWVreEljLXR3WXlTd3ZZY092TkIyNHUyZm5aSjVvOWpvZXcxNnRnR1ladzZMM2c4OWZzcW9sOVNHOU1BcW52MGpz?oc=5	https://lh3.googleusercontent.com/J6_coFbogxhRI9iM864NL_liGXvsQp2AupsKei7z0cNNfDvGUmWUy20nuUhkREQyrpY4bEeIBuc=s0-w300	\N	2026-03-05T20:34:33+0000	\N	2026-03-08 10:29:45.96739-04	\N	\N
 233	POULIN’S OVERTIME GOAL, THREE POINTS LEAD VICTOIRE TO THRILLING 3-2 WIN OVER FROST	https://www.thepwhl.com/en/news/2026/january/04/poulin-overtime-goal-three-points-lead-victoire-to-thrilling-3-2-win-over-frost	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/CREDIT_PWHL_-_MIN_at_MTL_-_Jan._4_2026_12?_a=DATAg1ZSZAA0	\N	2026-01-04	\N	2026-03-05 16:42:28.232253-05	["https://assets.leaguestat.com/pwhl/logos/2.png", "https://assets.leaguestat.com/pwhl/logos/3.png"]	https://assets.leaguestat.com/pwhl/60x60/31.jpg
 230	PWHL WEEKLY NOTEBOOK: JAN. 5, 2026	https://www.thepwhl.com/en/news/2026/january/05/pwhl-weekly-notebook-jan-5-2026	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/PWHL_SEA_TORJAN32026_COFFEY_ALLFINALS-112?_a=DATAg1ZSZAA0	\N	2026-01-05	\N	2026-03-05 14:42:37.641985-05	\N	\N
 231	JAN. 6: NEW YORK AT TORONTO PRE-GAME PRIMER	https://www.thepwhl.com/en/news/2026/january/06/jan-6-new-york-at-toronto-pre-game-primer	https://res.cloudinary.com/pwhl-low/image/upload/c_fill,g_faces:auto,h_630,w_1200/q_auto/f_jpg/HeatherPollock-Sceptres-20250125-0845?_a=DATAg1ZSZAA0	\N	2026-01-06	\N	2026-03-05 14:42:37.641985-05	["https://assets.leaguestat.com/pwhl/logos/4.png", "https://assets.leaguestat.com/pwhl/logos/6.png"]	\N
@@ -5341,7 +5485,7 @@ COPY public.news_articles (id, title, url, thumbnail, fallback_image, date_str, 
 
 
 --
--- Data for Name: player_stats; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: player_stats; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.player_stats (id, player_id, season, game_id, games_played, goals, assists, points, plus_minus, penalty_minutes, shots, hits, blocks, faceoffs_won, faceoffs_total, time_on_ice, wins, losses, overtime_losses, saves, shots_against, goals_against, shutouts, save_percentage, goals_against_average, fantasy_points, is_season_total, created_at, updated_at) FROM stdin;
@@ -5870,7 +6014,7 @@ COPY public.player_stats (id, player_id, season, game_id, games_played, goals, a
 
 
 --
--- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: players; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.players (id, pwhl_player_id, first_name, last_name, "position", jersey_number, pwhl_team_id, nationality, birthdate, height_cm, weight_kg, shoots, is_active, headshot_url, created_at, updated_at) FROM stdin;
@@ -6072,7 +6216,7 @@ COPY public.players (id, pwhl_player_id, first_name, last_name, "position", jers
 
 
 --
--- Data for Name: pwhl_teams; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: pwhl_teams; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.pwhl_teams (id, name, city, abbreviation, logo_url, primary_color, secondary_color, arena, created_at, updated_at) FROM stdin;
@@ -6089,7 +6233,7 @@ COPY public.pwhl_teams (id, name, city, abbreviation, logo_url, primary_color, s
 
 
 --
--- Data for Name: scoring_settings; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: scoring_settings; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.scoring_settings (id, league_id, goal_pts, assist_pts, plus_minus_pts, pim_pts, shot_pts, hit_pts, block_pts, goalie_win_pts, goalie_save_pts, goals_against_pts, shutout_pts, goalie_loss_pts, created_at, updated_at) FROM stdin;
@@ -6116,7 +6260,7 @@ COPY public.scoring_settings (id, league_id, goal_pts, assist_pts, plus_minus_pt
 
 
 --
--- Data for Name: trade_items; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: trade_items; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.trade_items (id, trade_id, player_id, from_team_id, to_team_id) FROM stdin;
@@ -6124,7 +6268,7 @@ COPY public.trade_items (id, trade_id, player_id, from_team_id, to_team_id) FROM
 
 
 --
--- Data for Name: trades; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: trades; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.trades (id, league_id, proposing_team_id, receiving_team_id, status, message, proposed_at, responded_at) FROM stdin;
@@ -6132,7 +6276,7 @@ COPY public.trades (id, league_id, proposing_team_id, receiving_team_id, status,
 
 
 --
--- Data for Name: two_factor_setups; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: two_factor_setups; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.two_factor_setups (id, user_id, secret, is_confirmed, backup_codes, created_at) FROM stdin;
@@ -6141,7 +6285,7 @@ COPY public.two_factor_setups (id, user_id, secret, is_confirmed, backup_codes, 
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.users (id, email, username, hashed_password, is_active, is_verified, two_factor_enabled, created_at, updated_at) FROM stdin;
@@ -6152,7 +6296,7 @@ COPY public.users (id, email, username, hashed_password, is_active, is_verified,
 
 
 --
--- Data for Name: waivers; Type: TABLE DATA; Schema: public; Owner: eric
+-- Data for Name: waivers; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.waivers (id, league_id, fantasy_team_id, player_add_id, player_drop_id, status, priority, bid_amount, requested_at, processed_at) FROM stdin;
@@ -6160,154 +6304,154 @@ COPY public.waivers (id, league_id, fantasy_team_id, player_add_id, player_drop_
 
 
 --
--- Name: analytics_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: analytics_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.analytics_events_id_seq', 1122, true);
+SELECT pg_catalog.setval('public.analytics_events_id_seq', 1182, true);
 
 
 --
--- Name: device_profiles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: device_profiles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.device_profiles_id_seq', 1, true);
 
 
 --
--- Name: draft_picks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: draft_picks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.draft_picks_id_seq', 40, true);
 
 
 --
--- Name: draft_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: draft_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.draft_sessions_id_seq', 1, true);
 
 
 --
--- Name: fantasy_rosters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: fantasy_rosters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.fantasy_rosters_id_seq', 5090, true);
 
 
 --
--- Name: fantasy_teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: fantasy_teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.fantasy_teams_id_seq', 392, true);
 
 
 --
--- Name: game_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: game_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.game_events_id_seq', 1, false);
 
 
 --
--- Name: games_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: games_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.games_id_seq', 350, true);
 
 
 --
--- Name: league_invites_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: league_invites_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.league_invites_id_seq', 1, false);
 
 
 --
--- Name: league_members_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: league_members_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.league_members_id_seq', 101, true);
 
 
 --
--- Name: leagues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: leagues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.leagues_id_seq', 34, true);
 
 
 --
--- Name: news_articles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: news_articles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.news_articles_id_seq', 403, true);
+SELECT pg_catalog.setval('public.news_articles_id_seq', 409, true);
 
 
 --
--- Name: player_stats_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: player_stats_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.player_stats_id_seq', 756, true);
 
 
 --
--- Name: players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.players_id_seq', 208, true);
 
 
 --
--- Name: pwhl_teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: pwhl_teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.pwhl_teams_id_seq', 10, true);
 
 
 --
--- Name: scoring_settings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: scoring_settings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.scoring_settings_id_seq', 34, true);
 
 
 --
--- Name: trade_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: trade_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.trade_items_id_seq', 2, true);
 
 
 --
--- Name: trades_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: trades_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.trades_id_seq', 1, true);
 
 
 --
--- Name: two_factor_setups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: two_factor_setups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.two_factor_setups_id_seq', 1, true);
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.users_id_seq', 3, true);
 
 
 --
--- Name: waivers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: eric
+-- Name: waivers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.waivers_id_seq', 1, false);
 
 
 --
--- Name: alembic_version alembic_version_pkc; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: alembic_version alembic_version_pkc; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.alembic_version
@@ -6315,7 +6459,7 @@ ALTER TABLE ONLY public.alembic_version
 
 
 --
--- Name: analytics_events analytics_events_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: analytics_events analytics_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.analytics_events
@@ -6323,7 +6467,7 @@ ALTER TABLE ONLY public.analytics_events
 
 
 --
--- Name: device_profiles device_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: device_profiles device_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.device_profiles
@@ -6331,7 +6475,7 @@ ALTER TABLE ONLY public.device_profiles
 
 
 --
--- Name: draft_picks draft_picks_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_picks draft_picks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_picks
@@ -6339,7 +6483,7 @@ ALTER TABLE ONLY public.draft_picks
 
 
 --
--- Name: draft_sessions draft_sessions_league_id_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_sessions draft_sessions_league_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_sessions
@@ -6347,7 +6491,7 @@ ALTER TABLE ONLY public.draft_sessions
 
 
 --
--- Name: draft_sessions draft_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_sessions draft_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_sessions
@@ -6355,7 +6499,7 @@ ALTER TABLE ONLY public.draft_sessions
 
 
 --
--- Name: fantasy_rosters fantasy_rosters_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: fantasy_rosters fantasy_rosters_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_rosters
@@ -6363,7 +6507,7 @@ ALTER TABLE ONLY public.fantasy_rosters
 
 
 --
--- Name: fantasy_teams fantasy_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: fantasy_teams fantasy_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_teams
@@ -6371,7 +6515,7 @@ ALTER TABLE ONLY public.fantasy_teams
 
 
 --
--- Name: game_events game_events_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: game_events game_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_events
@@ -6379,7 +6523,7 @@ ALTER TABLE ONLY public.game_events
 
 
 --
--- Name: games games_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: games games_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.games
@@ -6387,7 +6531,7 @@ ALTER TABLE ONLY public.games
 
 
 --
--- Name: league_invites league_invites_invite_code_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: league_invites league_invites_invite_code_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_invites
@@ -6395,7 +6539,7 @@ ALTER TABLE ONLY public.league_invites
 
 
 --
--- Name: league_invites league_invites_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: league_invites league_invites_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_invites
@@ -6403,7 +6547,7 @@ ALTER TABLE ONLY public.league_invites
 
 
 --
--- Name: league_members league_members_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: league_members league_members_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_members
@@ -6411,7 +6555,7 @@ ALTER TABLE ONLY public.league_members
 
 
 --
--- Name: leagues leagues_invite_code_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: leagues leagues_invite_code_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.leagues
@@ -6419,7 +6563,7 @@ ALTER TABLE ONLY public.leagues
 
 
 --
--- Name: leagues leagues_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: leagues leagues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.leagues
@@ -6427,7 +6571,7 @@ ALTER TABLE ONLY public.leagues
 
 
 --
--- Name: news_articles news_articles_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: news_articles news_articles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.news_articles
@@ -6435,7 +6579,7 @@ ALTER TABLE ONLY public.news_articles
 
 
 --
--- Name: news_articles news_articles_url_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: news_articles news_articles_url_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.news_articles
@@ -6443,7 +6587,7 @@ ALTER TABLE ONLY public.news_articles
 
 
 --
--- Name: player_stats player_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: player_stats player_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_stats
@@ -6451,7 +6595,7 @@ ALTER TABLE ONLY public.player_stats
 
 
 --
--- Name: players players_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: players players_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.players
@@ -6459,7 +6603,7 @@ ALTER TABLE ONLY public.players
 
 
 --
--- Name: pwhl_teams pwhl_teams_abbreviation_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: pwhl_teams pwhl_teams_abbreviation_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.pwhl_teams
@@ -6467,7 +6611,7 @@ ALTER TABLE ONLY public.pwhl_teams
 
 
 --
--- Name: pwhl_teams pwhl_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: pwhl_teams pwhl_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.pwhl_teams
@@ -6475,7 +6619,7 @@ ALTER TABLE ONLY public.pwhl_teams
 
 
 --
--- Name: scoring_settings scoring_settings_league_id_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: scoring_settings scoring_settings_league_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scoring_settings
@@ -6483,7 +6627,7 @@ ALTER TABLE ONLY public.scoring_settings
 
 
 --
--- Name: scoring_settings scoring_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: scoring_settings scoring_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scoring_settings
@@ -6491,7 +6635,7 @@ ALTER TABLE ONLY public.scoring_settings
 
 
 --
--- Name: trade_items trade_items_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: trade_items trade_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trade_items
@@ -6499,7 +6643,7 @@ ALTER TABLE ONLY public.trade_items
 
 
 --
--- Name: trades trades_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: trades trades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trades
@@ -6507,7 +6651,7 @@ ALTER TABLE ONLY public.trades
 
 
 --
--- Name: two_factor_setups two_factor_setups_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: two_factor_setups two_factor_setups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.two_factor_setups
@@ -6515,7 +6659,7 @@ ALTER TABLE ONLY public.two_factor_setups
 
 
 --
--- Name: two_factor_setups two_factor_setups_user_id_key; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: two_factor_setups two_factor_setups_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.two_factor_setups
@@ -6523,7 +6667,7 @@ ALTER TABLE ONLY public.two_factor_setups
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -6531,7 +6675,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: waivers waivers_pkey; Type: CONSTRAINT; Schema: public; Owner: eric
+-- Name: waivers waivers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.waivers
@@ -6539,273 +6683,273 @@ ALTER TABLE ONLY public.waivers
 
 
 --
--- Name: ix_analytics_events_created_at; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_analytics_events_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_analytics_events_created_at ON public.analytics_events USING btree (created_at);
 
 
 --
--- Name: ix_analytics_events_event_type; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_analytics_events_event_type; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_analytics_events_event_type ON public.analytics_events USING btree (event_type);
 
 
 --
--- Name: ix_analytics_events_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_analytics_events_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_analytics_events_id ON public.analytics_events USING btree (id);
 
 
 --
--- Name: ix_analytics_events_session_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_analytics_events_session_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_analytics_events_session_id ON public.analytics_events USING btree (session_id);
 
 
 --
--- Name: ix_analytics_events_user_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_analytics_events_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_analytics_events_user_id ON public.analytics_events USING btree (user_id);
 
 
 --
--- Name: ix_device_profiles_device_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_device_profiles_device_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_device_profiles_device_id ON public.device_profiles USING btree (device_id);
 
 
 --
--- Name: ix_device_profiles_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_device_profiles_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_device_profiles_id ON public.device_profiles USING btree (id);
 
 
 --
--- Name: ix_device_profiles_user_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_device_profiles_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_device_profiles_user_id ON public.device_profiles USING btree (user_id);
 
 
 --
--- Name: ix_draft_picks_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_draft_picks_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_draft_picks_id ON public.draft_picks USING btree (id);
 
 
 --
--- Name: ix_draft_picks_league_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_draft_picks_league_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_draft_picks_league_id ON public.draft_picks USING btree (league_id);
 
 
 --
--- Name: ix_draft_sessions_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_draft_sessions_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_draft_sessions_id ON public.draft_sessions USING btree (id);
 
 
 --
--- Name: ix_fantasy_rosters_fantasy_team_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_fantasy_rosters_fantasy_team_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_fantasy_rosters_fantasy_team_id ON public.fantasy_rosters USING btree (fantasy_team_id);
 
 
 --
--- Name: ix_fantasy_rosters_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_fantasy_rosters_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_fantasy_rosters_id ON public.fantasy_rosters USING btree (id);
 
 
 --
--- Name: ix_fantasy_rosters_player_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_fantasy_rosters_player_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_fantasy_rosters_player_id ON public.fantasy_rosters USING btree (player_id);
 
 
 --
--- Name: ix_fantasy_teams_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_fantasy_teams_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_fantasy_teams_id ON public.fantasy_teams USING btree (id);
 
 
 --
--- Name: ix_game_events_game_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_game_events_game_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_game_events_game_id ON public.game_events USING btree (game_id);
 
 
 --
--- Name: ix_game_events_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_game_events_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_game_events_id ON public.game_events USING btree (id);
 
 
 --
--- Name: ix_games_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_games_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_games_id ON public.games USING btree (id);
 
 
 --
--- Name: ix_games_pwhl_game_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_games_pwhl_game_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_games_pwhl_game_id ON public.games USING btree (pwhl_game_id);
 
 
 --
--- Name: ix_league_invites_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_league_invites_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_league_invites_id ON public.league_invites USING btree (id);
 
 
 --
--- Name: ix_league_members_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_league_members_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_league_members_id ON public.league_members USING btree (id);
 
 
 --
--- Name: ix_leagues_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_leagues_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_leagues_id ON public.leagues USING btree (id);
 
 
 --
--- Name: ix_news_articles_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_news_articles_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_news_articles_id ON public.news_articles USING btree (id);
 
 
 --
--- Name: ix_player_stats_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_player_stats_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_player_stats_id ON public.player_stats USING btree (id);
 
 
 --
--- Name: ix_player_stats_player_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_player_stats_player_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_player_stats_player_id ON public.player_stats USING btree (player_id);
 
 
 --
--- Name: ix_players_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_players_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_players_id ON public.players USING btree (id);
 
 
 --
--- Name: ix_players_pwhl_player_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_players_pwhl_player_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_players_pwhl_player_id ON public.players USING btree (pwhl_player_id);
 
 
 --
--- Name: ix_pwhl_teams_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_pwhl_teams_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_pwhl_teams_id ON public.pwhl_teams USING btree (id);
 
 
 --
--- Name: ix_scoring_settings_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_scoring_settings_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_scoring_settings_id ON public.scoring_settings USING btree (id);
 
 
 --
--- Name: ix_trade_items_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_trade_items_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_trade_items_id ON public.trade_items USING btree (id);
 
 
 --
--- Name: ix_trades_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_trades_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_trades_id ON public.trades USING btree (id);
 
 
 --
--- Name: ix_trades_league_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_trades_league_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_trades_league_id ON public.trades USING btree (league_id);
 
 
 --
--- Name: ix_two_factor_setups_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_two_factor_setups_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_two_factor_setups_id ON public.two_factor_setups USING btree (id);
 
 
 --
--- Name: ix_users_email; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_users_email; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_users_email ON public.users USING btree (email);
 
 
 --
--- Name: ix_users_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_users_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_users_id ON public.users USING btree (id);
 
 
 --
--- Name: ix_users_username; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_users_username; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_users_username ON public.users USING btree (username);
 
 
 --
--- Name: ix_waivers_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_waivers_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_waivers_id ON public.waivers USING btree (id);
 
 
 --
--- Name: ix_waivers_league_id; Type: INDEX; Schema: public; Owner: eric
+-- Name: ix_waivers_league_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_waivers_league_id ON public.waivers USING btree (league_id);
 
 
 --
--- Name: draft_picks draft_picks_fantasy_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_picks draft_picks_fantasy_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_picks
@@ -6813,7 +6957,7 @@ ALTER TABLE ONLY public.draft_picks
 
 
 --
--- Name: draft_picks draft_picks_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_picks draft_picks_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_picks
@@ -6821,7 +6965,7 @@ ALTER TABLE ONLY public.draft_picks
 
 
 --
--- Name: draft_picks draft_picks_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_picks draft_picks_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_picks
@@ -6829,7 +6973,7 @@ ALTER TABLE ONLY public.draft_picks
 
 
 --
--- Name: draft_sessions draft_sessions_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: draft_sessions draft_sessions_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.draft_sessions
@@ -6837,7 +6981,7 @@ ALTER TABLE ONLY public.draft_sessions
 
 
 --
--- Name: fantasy_rosters fantasy_rosters_fantasy_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: fantasy_rosters fantasy_rosters_fantasy_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_rosters
@@ -6845,7 +6989,7 @@ ALTER TABLE ONLY public.fantasy_rosters
 
 
 --
--- Name: fantasy_rosters fantasy_rosters_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: fantasy_rosters fantasy_rosters_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_rosters
@@ -6853,7 +6997,7 @@ ALTER TABLE ONLY public.fantasy_rosters
 
 
 --
--- Name: fantasy_teams fantasy_teams_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: fantasy_teams fantasy_teams_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_teams
@@ -6861,7 +7005,7 @@ ALTER TABLE ONLY public.fantasy_teams
 
 
 --
--- Name: fantasy_teams fantasy_teams_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: fantasy_teams fantasy_teams_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.fantasy_teams
@@ -6869,7 +7013,7 @@ ALTER TABLE ONLY public.fantasy_teams
 
 
 --
--- Name: game_events game_events_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: game_events game_events_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_events
@@ -6877,7 +7021,7 @@ ALTER TABLE ONLY public.game_events
 
 
 --
--- Name: game_events game_events_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: game_events game_events_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_events
@@ -6885,7 +7029,7 @@ ALTER TABLE ONLY public.game_events
 
 
 --
--- Name: game_events game_events_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: game_events game_events_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_events
@@ -6893,7 +7037,7 @@ ALTER TABLE ONLY public.game_events
 
 
 --
--- Name: games games_away_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: games games_away_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.games
@@ -6901,7 +7045,7 @@ ALTER TABLE ONLY public.games
 
 
 --
--- Name: games games_home_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: games games_home_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.games
@@ -6909,7 +7053,7 @@ ALTER TABLE ONLY public.games
 
 
 --
--- Name: league_invites league_invites_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: league_invites league_invites_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_invites
@@ -6917,7 +7061,7 @@ ALTER TABLE ONLY public.league_invites
 
 
 --
--- Name: league_members league_members_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: league_members league_members_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_members
@@ -6925,7 +7069,7 @@ ALTER TABLE ONLY public.league_members
 
 
 --
--- Name: league_members league_members_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: league_members league_members_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.league_members
@@ -6933,7 +7077,7 @@ ALTER TABLE ONLY public.league_members
 
 
 --
--- Name: leagues leagues_commissioner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: leagues leagues_commissioner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.leagues
@@ -6941,7 +7085,7 @@ ALTER TABLE ONLY public.leagues
 
 
 --
--- Name: player_stats player_stats_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: player_stats player_stats_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_stats
@@ -6949,7 +7093,7 @@ ALTER TABLE ONLY public.player_stats
 
 
 --
--- Name: player_stats player_stats_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: player_stats player_stats_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_stats
@@ -6957,7 +7101,7 @@ ALTER TABLE ONLY public.player_stats
 
 
 --
--- Name: players players_pwhl_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: players players_pwhl_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.players
@@ -6965,7 +7109,7 @@ ALTER TABLE ONLY public.players
 
 
 --
--- Name: scoring_settings scoring_settings_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: scoring_settings scoring_settings_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scoring_settings
@@ -6973,7 +7117,7 @@ ALTER TABLE ONLY public.scoring_settings
 
 
 --
--- Name: trade_items trade_items_from_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trade_items trade_items_from_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trade_items
@@ -6981,7 +7125,7 @@ ALTER TABLE ONLY public.trade_items
 
 
 --
--- Name: trade_items trade_items_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trade_items trade_items_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trade_items
@@ -6989,7 +7133,7 @@ ALTER TABLE ONLY public.trade_items
 
 
 --
--- Name: trade_items trade_items_to_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trade_items trade_items_to_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trade_items
@@ -6997,7 +7141,7 @@ ALTER TABLE ONLY public.trade_items
 
 
 --
--- Name: trade_items trade_items_trade_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trade_items trade_items_trade_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trade_items
@@ -7005,7 +7149,7 @@ ALTER TABLE ONLY public.trade_items
 
 
 --
--- Name: trades trades_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trades trades_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trades
@@ -7013,7 +7157,7 @@ ALTER TABLE ONLY public.trades
 
 
 --
--- Name: trades trades_proposing_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trades trades_proposing_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trades
@@ -7021,7 +7165,7 @@ ALTER TABLE ONLY public.trades
 
 
 --
--- Name: trades trades_receiving_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: trades trades_receiving_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trades
@@ -7029,7 +7173,7 @@ ALTER TABLE ONLY public.trades
 
 
 --
--- Name: two_factor_setups two_factor_setups_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: two_factor_setups two_factor_setups_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.two_factor_setups
@@ -7037,7 +7181,7 @@ ALTER TABLE ONLY public.two_factor_setups
 
 
 --
--- Name: waivers waivers_fantasy_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: waivers waivers_fantasy_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.waivers
@@ -7045,7 +7189,7 @@ ALTER TABLE ONLY public.waivers
 
 
 --
--- Name: waivers waivers_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: waivers waivers_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.waivers
@@ -7053,7 +7197,7 @@ ALTER TABLE ONLY public.waivers
 
 
 --
--- Name: waivers waivers_player_add_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: waivers waivers_player_add_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.waivers
@@ -7061,7 +7205,7 @@ ALTER TABLE ONLY public.waivers
 
 
 --
--- Name: waivers waivers_player_drop_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: eric
+-- Name: waivers waivers_player_drop_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.waivers
