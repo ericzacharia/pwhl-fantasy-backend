@@ -129,6 +129,10 @@ def set_lineup(
     """
     from app.services.league_rules import validate_lineup, is_slot_eligible
 
+    from app.services.daily_scoring import is_lineup_locked
+    if is_lineup_locked(db):
+        raise HTTPException(status_code=423, detail="Lineup is locked — games have already started today")
+
     team = db.query(FantasyTeam).filter_by(id=team_id, owner_id=current_user.id).first()
     if not team:
         raise HTTPException(status_code=403, detail="Not your team")
@@ -174,6 +178,26 @@ def set_lineup(
 
     db.commit()
     return {"message": "Lineup updated", "active_count": len([p for p in assigned_ids if not next((k for k,v in req.slots.items() if v==p), "BN").startswith("BN")])}
+
+
+@router.get("/teams/{team_id}/lineup/status")
+def get_lineup_status(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns lock status and lock time for today's lineup."""
+    import datetime, pytz
+    from app.services.daily_scoring import get_lineup_lock_time, is_lineup_locked
+    ET = pytz.timezone("America/New_York")
+    date = datetime.datetime.now(ET).date()
+    lock_time = get_lineup_lock_time(db, date)
+    locked = is_lineup_locked(db, date)
+    return {
+        "locked": locked,
+        "lock_time": lock_time.isoformat() if lock_time else None,
+        "date": str(date),
+    }
 
 
 @router.get("/teams/{team_id}/lineup")

@@ -42,3 +42,19 @@ def stats_summary(db: Session = Depends(get_db), _: User = Depends(get_current_u
         "users": db.query(UserModel).count(),
         "leagues": db.query(League).count(),
     }
+
+
+@router.post("/score-daily")
+def score_daily(
+    date_str: str = None,
+    season: str = "2025-2026",
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """Manually trigger daily scoring for a given date (YYYY-MM-DD). Defaults to today ET."""
+    import datetime, pytz
+    from app.services.daily_scoring import score_daily_lineup
+    ET = pytz.timezone("America/New_York")
+    date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else datetime.datetime.now(ET).date()
+    result = score_daily_lineup(db, date, season)
+    return result

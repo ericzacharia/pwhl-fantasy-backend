@@ -125,3 +125,24 @@ class Waiver(Base):
 
     player_add = relationship("Player", foreign_keys=[player_add_id])
     player_drop = relationship("Player", foreign_keys=[player_drop_id])
+
+
+class LineupSnapshot(Base):
+    """Daily lineup record — captures which players were in which slots on a given date.
+    Created when lineup is submitted or auto-carried forward at game time."""
+    __tablename__ = "lineup_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    fantasy_team_id = Column(Integer, ForeignKey("fantasy_teams.id"), index=True)
+    snapshot_date = Column(Date, nullable=False, index=True)
+    slot_label = Column(String(10), nullable=False)   # "F_0", "D_1", "UTIL_0", etc.
+    slot_type = Column(String(6), nullable=False)     # "F", "D", "G", "UTIL", "BN"
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True)
+    fantasy_points_earned = Column(Float, default=0.0)  # points scored in this slot this day
+    locked_at = Column(DateTime(timezone=True))         # when lineup was locked for this date
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("fantasy_team_id", "snapshot_date", "slot_label",
+                         name="uq_lineup_snapshot_team_date_slot"),
+    )
