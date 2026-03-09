@@ -109,26 +109,138 @@ def get_team_roster(
 
 # ── Lineup ───────────────────────────────────────────────────────────────────────
 
-class LineupUpdate(BaseModel):
-    active_player_ids: List[int]
+class SlotAssignment(BaseModel):
+    """Maps slot label (e.g. "F_0", "D_1", "UTIL_0", "BN_0") to player_id or null."""
+    slots: dict  # {slot_label: player_id | None}
 
 
 @router.post("/teams/{team_id}/lineup")
 def set_lineup(
     team_id: int,
-    req: LineupUpdate,
+    req: SlotAssignment,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """
+    Set today's lineup. Rules:
+    - Players only in eligible slots (D can't fill F slot unless UTIL)
+    - Players with no game today score 0 regardless (enforced at scoring time)
+    - Carries over automatically if not updated (last lineup persists)
+    """
+    from app.services.league_rules import validate_lineup, is_slot_eligible
+
     team = db.query(FantasyTeam).filter_by(id=team_id, owner_id=current_user.id).first()
     if not team:
         raise HTTPException(status_code=403, detail="Not your team")
 
     entries = db.query(FantasyRoster).filter_by(fantasy_team_id=team_id, is_active=True).all()
+    player_map = {e.player_id: e for e in entries}
+
+    # Build position map for validation
+    from app.models.pwhl import Player
+    player_positions = {}
+    for pid in player_map:
+        p = db.query(Player).filter_by(id=pid).first()
+        if p:
+            player_positions[pid] = p.position or "F"
+
+    # Validate slot eligibility
+    errors = validate_lineup(req.slots, player_positions)
+    if errors:
+        raise HTTPException(status_code=400, detail="; ".join(errors))
+
+    # Check no player assigned to multiple slots
+    assigned_ids = [pid for pid in req.slots.values() if pid is not None]
+    if len(assigned_ids) != len(set(assigned_ids)):
+        raise HTTPException(status_code=400, detail="Player assigned to multiple slots")
+
+    # Check all assigned players are on this roster
+    for pid in assigned_ids:
+        if pid not in player_map:
+            raise HTTPException(status_code=400, detail=f"Player {pid} not on roster")
+
+    # Apply slot assignments
+    assigned_set = set(assigned_ids)
     for entry in entries:
-        entry.slot = "active" if entry.player_id in req.active_player_ids else "bench"
+        if entry.player_id in assigned_set:
+            # Find which slot this player is in
+            slot_label = next((k for k, v in req.slots.items() if v == entry.player_id), None)
+            slot_type = slot_label.split("_")[0] if slot_label else "BN"
+            entry.position_slot = slot_label
+            entry.slot = "bench" if slot_type == "BN" else "active"
+        else:
+            # Not assigned — bench
+            entry.slot = "bench"
+
     db.commit()
-    return {"message": "Lineup updated"}
+    return {"message": "Lineup updated", "active_count": len([p for p in assigned_ids if not next((k for k,v in req.slots.items() if v==p), "BN").startswith("BN")])}
+
+
+@router.get("/teams/{team_id}/lineup")
+def get_lineup(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get current lineup with slot assignments. Unassigned active slots are empty."""
+    team = db.query(FantasyTeam).filter_by(id=team_id, owner_id=current_user.id).first()
+    if not team:
+        raise HTTPException(status_code=403, detail="Not your team")
+
+    from app.services.league_rules import ACTIVE_SLOTS, BENCH_SLOTS, SLOT_ELIGIBILITY
+    from app.models.pwhl import Player
+    import datetime, pytz
+
+    entries = db.query(FantasyRoster).filter_by(fantasy_team_id=team_id, is_active=True).all()
+
+    # Check which players have games today (ET)
+    today_et = datetime.datetime.now(pytz.timezone("America/New_York")).date()
+    from app.models.pwhl import Game
+    today_game_player_ids = set()
+    today_games = db.query(Game).filter(
+        Game.game_date == today_et,
+        Game.status != "final"
+    ).all()
+    from app.models.pwhl import Player as P
+    for game in today_games:
+        # Get all players on home and away teams
+        players = db.query(P).filter(P.team_id.in_([game.home_team_id, game.away_team_id])).all()
+        for p in players:
+            today_game_player_ids.add(p.id)
+
+    # Build slot -> player mapping from current roster
+    slot_map = {}
+    for e in entries:
+        if e.position_slot:
+            slot_map[e.position_slot] = e
+
+    # Build response
+    result_slots = []
+    slot_counters = {}
+    for slot_type in ACTIVE_SLOTS + BENCH_SLOTS:
+        idx = slot_counters.get(slot_type, 0)
+        slot_counters[slot_type] = idx + 1
+        label = f"{slot_type}_{idx}"
+        entry = slot_map.get(label)
+        player_data = None
+        if entry:
+            p = db.query(Player).filter_by(id=entry.player_id).first()
+            if p:
+                player_data = {
+                    "id": p.id,
+                    "full_name": p.full_name,
+                    "position": p.position,
+                    "has_game_today": p.id in today_game_player_ids,
+                }
+        result_slots.append({
+            "slot_label": label,
+            "slot_type": slot_type,
+            "eligible_positions": list(SLOT_ELIGIBILITY.get(slot_type, set())),
+            "is_active": slot_type != "BN",
+            "player": player_data,
+        })
+
+    return {"slots": result_slots}
 
 
 # ── League Standings ─────────────────────────────────────────────────────────────
