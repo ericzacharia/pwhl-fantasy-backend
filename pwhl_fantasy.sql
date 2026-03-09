@@ -6291,7 +6291,7 @@ COPY public.two_factor_setups (id, user_id, secret, is_confirmed, backup_codes, 
 COPY public.users (id, email, username, hashed_password, is_active, is_verified, two_factor_enabled, created_at, updated_at) FROM stdin;
 1	test@pwhl.com	pwhl_fan	$2b$12$9qsCpUC8di1xL6WK8H2fLe534MpyJSZpH7KIRM7NPzNXLD3pCt5AK	t	f	f	2026-03-05 00:14:44.151016-05	\N
 2	user2@pwhl.com	fan2	$2b$12$.Q.Uanb9Km5vjpcSCPmUUey6XO3C9v6pyeHDwBnRwoOm1Ajzcsoki	t	f	f	2026-03-05 00:18:02.053617-05	\N
-3	ekzacharia@unsupervisedbias.com	ericzacharia	$2b$12$p9LI0PeFhTSqqb1XNOhA3ONX0uK0WXX7u/igpprs4AyGgFkj782zq	t	f	f	2026-03-05 08:16:59.715404-05	\N
+3	ekzacharia@unsupervisedbias.com	ericzacharia	$2b$12$mspAGF7JitPvOUTOWjwdTuQoGcmV/8A.GcsS1Jg5BKsjkpfQqJwbO	t	f	f	2026-03-05 08:16:59.715404-05	\N
 \.
 
 
