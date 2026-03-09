@@ -20,9 +20,10 @@ router = APIRouter(prefix="/pwhl", tags=["pwhl"])
 def get_standings(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
+    season: str = "2025-2026",
 ):
     teams = db.query(PWHLTeam).all()
-    games = db.query(Game).filter(Game.status == "final").all()
+    games = db.query(Game).filter(Game.status == "final", Game.season == season).all()
 
     standings = {}
     for team in teams:
