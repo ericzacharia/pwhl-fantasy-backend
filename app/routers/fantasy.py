@@ -33,7 +33,7 @@ def _roster_entry_dict(entry):
         "roster_id": entry.id,
         "player_id": entry.player_id,
         "player_name": entry.player.full_name,
-        "position": entry.player.position,
+        "position": entry.player.position or "F",
         "slot": entry.slot,
         "position_slot": entry.position_slot,
         "acquired_via": entry.acquired_via,
