@@ -1,3 +1,4 @@
+from passlib.context import CryptContext
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import json
@@ -140,3 +141,89 @@ def change_password(req: PasswordChange, db: Session = Depends(get_db), current_
     current_user.hashed_password = hash_password(req.new_password)
     db.commit()
     return {"message": "Password updated"}
+
+
+# ── Password Reset via Email ─────────────────────────────────────────────────
+
+import smtplib, random, string
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta, timezone
+from pydantic import BaseModel as PydanticBase
+
+# In-memory store: {email: {"code": "123456", "expires": datetime}}
+_reset_codes: dict = {}
+
+class PasswordResetRequest(PydanticBase):
+    email: str
+
+class PasswordResetConfirm(PydanticBase):
+    email: str
+    code: str
+    new_password: str
+
+def _send_reset_email(to_email: str, code: str):
+    import os
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    port = int(os.getenv("SMTP_PORT", 587))
+    user = os.getenv("SMTP_USER", "")
+    password = os.getenv("SMTP_PASS", "")
+    from_email = os.getenv("FROM_EMAIL", user)
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "PWHL Fantasy — Password Reset Code"
+    msg["From"] = f"PWHL Fantasy <{from_email}>"
+    msg["To"] = to_email
+
+    html = f"""
+    <div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:32px">
+      <h2 style="color:#6b21a8">PWHL Fantasy 🏒</h2>
+      <p>Your password reset code is:</p>
+      <div style="font-size:40px;font-weight:bold;letter-spacing:8px;color:#6b21a8;padding:24px 0">{code}</div>
+      <p style="color:#666">This code expires in 15 minutes. If you didn't request this, ignore this email.</p>
+    </div>
+    """
+    msg.attach(MIMEText(html, "html"))
+
+    with smtplib.SMTP(host, port) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(user, password)
+        server.sendmail(from_email, to_email, msg.as_string())
+
+@router.post("/request-password-reset")
+def request_password_reset(req: PasswordResetRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == req.email).first()
+    # Always return success to prevent email enumeration
+    if user:
+        code = "".join(random.choices(string.digits, k=6))
+        _reset_codes[req.email] = {
+            "code": code,
+            "expires": datetime.now(timezone.utc) + timedelta(minutes=15)
+        }
+        try:
+            _send_reset_email(req.email, code)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+    return {"message": "If that email is registered, a reset code has been sent."}
+
+@router.post("/confirm-password-reset")
+def confirm_password_reset(req: PasswordResetConfirm, db: Session = Depends(get_db)):
+    entry = _reset_codes.get(req.email)
+    if not entry:
+        raise HTTPException(status_code=400, detail="No reset code found. Please request a new one.")
+    if datetime.now(timezone.utc) > entry["expires"]:
+        del _reset_codes[req.email]
+        raise HTTPException(status_code=400, detail="Code expired. Please request a new one.")
+    if entry["code"] != req.code:
+        raise HTTPException(status_code=400, detail="Invalid code.")
+
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    user.hashed_password = pwd_context.hash(req.new_password)
+    db.commit()
+    del _reset_codes[req.email]
+    return {"message": "Password updated successfully."}
