@@ -16,7 +16,9 @@ CLIENT_CODE = "pwhl"
 APP_KEY = "446521baf8c38984"
 LEAGUE_ID = "1"
 # HockeyTech season IDs (modulekit feed): 1=2024, 5=2024-2025, 8=2025-2026
-SEASON_ID = "8"  # current 2025-2026 season
+SEASON_ID = "8"           # current 2025-2026 season
+PREV_SEASON_ID = "5"      # previous 2024-2025 season
+PREV_SEASON_LABEL = "2024-2025"
 
 # Static color data keyed by team code from API
 TEAM_COLORS = {
@@ -68,13 +70,13 @@ async def get_teams_from_api(session: aiohttp.ClientSession) -> list[dict]:
     return []
 
 
-async def get_player_stats_from_api(session: aiohttp.ClientSession) -> list[dict]:
+async def get_player_stats_from_api(session: aiohttp.ClientSession, season_id: str = SEASON_ID) -> list[dict]:
     """Fetch skater stats from HockeyTech API."""
     params = {
         **_base_params(),
         "view": "statviewtype",
         "type": "topscorers",
-        "season_id": SEASON_ID,
+        "season_id": season_id,
         "limit": "250",
         "sort": "points",
         "division_id": "-1",
@@ -86,13 +88,13 @@ async def get_player_stats_from_api(session: aiohttp.ClientSession) -> list[dict
     return []
 
 
-async def get_goalie_stats_from_api(session: aiohttp.ClientSession) -> list[dict]:
+async def get_goalie_stats_from_api(session: aiohttp.ClientSession, season_id: str = SEASON_ID) -> list[dict]:
     """Fetch goalie stats from HockeyTech API."""
     params = {
         **_base_params(),
         "view": "statviewtype",
         "type": "goalies",
-        "season_id": SEASON_ID,
+        "season_id": season_id,
         "limit": "50",
         "sort": "svpct",
         "division_id": "-1",
@@ -588,4 +590,104 @@ async def run_full_scrape(db) -> dict:
             results["errors"].append(f"Games scrape: {e}")
             logger.error(f"Games scrape error: {e}", exc_info=True)
 
+    return results
+
+
+async def run_prev_season_scrape(db) -> dict:
+    """
+    Scrape 2024-25 season totals using season_id=5 (modulekit feed).
+    Only updates player_stats rows; does not touch teams or games.
+    """
+    from app.models.player import Player, PlayerStats
+    import sqlalchemy
+
+    results = {"skaters": 0, "goalies": 0, "errors": []}
+    season_label = PREV_SEASON_LABEL
+
+    async with aiohttp.ClientSession() as session:
+        teams_raw = db.execute(sqlalchemy.text("SELECT id, abbreviation FROM pwhl_teams")).fetchall()
+        teams_by_abbr = {row[1]: row[0] for row in teams_raw}
+
+        def get_team_id(code: str):
+            mapped = TEAM_CODE_MAP.get(code, code)
+            return teams_by_abbr.get(mapped)
+
+        # --- 2024-25 Skaters ---
+        try:
+            skater_data = await get_player_stats_from_api(session, season_id=PREV_SEASON_ID)
+            logger.info(f"Prev season skaters: {len(skater_data)} rows from API")
+            for raw in skater_data:
+                player_info = parse_player_from_stats(raw)
+                player_stats = parse_skater_stats(raw)
+                team_abbr = player_info.pop("team_abbreviation", "")
+
+                player = db.query(Player).filter_by(
+                    pwhl_player_id=player_info["pwhl_player_id"]
+                ).first()
+                if not player:
+                    player = Player(**player_info, pwhl_team_id=get_team_id(team_abbr))
+                    db.add(player)
+                    db.flush()
+
+                stat = db.query(PlayerStats).filter_by(
+                    player_id=player.id, season=season_label, is_season_total=True
+                ).first()
+                if not stat:
+                    stat = PlayerStats(player_id=player.id, season=season_label,
+                                       is_season_total=True, **player_stats)
+                    db.add(stat)
+                else:
+                    for k, v in player_stats.items():
+                        setattr(stat, k, v)
+
+                from app.services.scoring import calculate_fantasy_points_default
+                stat.fantasy_points = calculate_fantasy_points_default(stat, player.position)
+                results["skaters"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Prev season skaters: {e}")
+            logger.error(f"Prev season skater error: {e}", exc_info=True)
+
+        # --- 2024-25 Goalies ---
+        try:
+            goalie_data = await get_goalie_stats_from_api(session, season_id=PREV_SEASON_ID)
+            logger.info(f"Prev season goalies: {len(goalie_data)} rows from API")
+            for raw in goalie_data:
+                player_info = parse_player_from_stats(raw)
+                player_info["position"] = "G"
+                goalie_stats = parse_goalie_stats(raw)
+                team_abbr = player_info.pop("team_abbreviation", "")
+
+                player = db.query(Player).filter_by(
+                    pwhl_player_id=player_info["pwhl_player_id"]
+                ).first()
+                if not player:
+                    player = Player(**player_info, pwhl_team_id=get_team_id(team_abbr))
+                    db.add(player)
+                    db.flush()
+                else:
+                    player.position = "G"
+
+                stat = db.query(PlayerStats).filter_by(
+                    player_id=player.id, season=season_label, is_season_total=True
+                ).first()
+                if not stat:
+                    stat = PlayerStats(player_id=player.id, season=season_label,
+                                       is_season_total=True, **goalie_stats)
+                    db.add(stat)
+                else:
+                    for k, v in goalie_stats.items():
+                        setattr(stat, k, v)
+
+                from app.services.scoring import calculate_fantasy_points_default
+                stat.fantasy_points = calculate_fantasy_points_default(stat, "G")
+                results["goalies"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Prev season goalies: {e}")
+            logger.error(f"Prev season goalie error: {e}", exc_info=True)
+
+    logger.info(f"Prev season scrape complete: {results}")
     return results
