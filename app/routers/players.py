@@ -12,6 +12,15 @@ from app.models.user import User
 
 router = APIRouter(prefix="/players", tags=["players"])
 
+# Map short season labels (as used by iOS app) to canonical DB labels
+SEASON_ALIASES = {
+    "2024": "2024-2025",
+    "2025": "2025-2026",
+}
+
+def normalize_season(season: str) -> str:
+    return SEASON_ALIASES.get(season, season)
+
 
 def player_to_response(player: Player, season: str = "2025-2026") -> PlayerResponse:
     season_stat = next(
@@ -92,6 +101,7 @@ def list_players(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
+    season = normalize_season(season)
     query = db.query(Player).options(
         joinedload(Player.stats),
         joinedload(Player.pwhl_team),
