@@ -15,7 +15,7 @@ import sys
 import hashlib
 import datetime
 import requests
-from openai import OpenAI
+import anthropic
 
 # Add parent to path so we can import app modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -24,7 +24,7 @@ from app.database import SessionLocal
 from app.models.news import NewsArticle
 
 API_BASE = os.getenv("PWHL_API_BASE", "http://localhost:8080/api/v1")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 AUTHOR = "UnsupervisedBias"
 SOURCE = "unsupervisedbias.com"
 
@@ -48,13 +48,12 @@ Details: {trend['description']}
 
 Output ONLY the article body — no headline, no byline."""
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
+    response = client.messages.create(
+        model="claude-haiku-4-5",
         max_tokens=150,
-        temperature=0.7,
+        messages=[{"role": "user", "content": prompt}],
     )
-    body = response.choices[0].message.content.strip()
+    body = response.content[0].text.strip()
     return trend["title"], body
 
 
@@ -65,11 +64,11 @@ def stable_url(trend_id: str, date: str) -> str:
 
 
 def run():
-    if not OPENAI_API_KEY:
-        print("ERROR: OPENAI_API_KEY not set")
+    if not ANTHROPIC_API_KEY:
+        print("ERROR: ANTHROPIC_API_KEY not set")
         sys.exit(1)
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     today = datetime.date.today().isoformat()
 
     print(f"Fetching trends for {today}...")
