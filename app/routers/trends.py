@@ -152,25 +152,59 @@ def get_trends(db: Session = Depends(get_db), season: str = "2025-2026", last_n:
                 "team": r.abbreviation,
             })
 
-    # 5. Close games trend (OT/SO finishes)
+    # 5. Per-team one-goal game rate (wins AND losses)
+    rows = db.execute(text("""
+        SELECT t.name, t.abbreviation,
+               COUNT(*) as gp,
+               SUM(CASE WHEN ABS(g.home_score - g.away_score) = 1 THEN 1 ELSE 0 END) as one_goal_games,
+               SUM(CASE WHEN (g.home_team_id = t.id AND g.home_score > g.away_score)
+                             OR (g.away_team_id = t.id AND g.away_score > g.home_score)
+                        THEN 1 ELSE 0 END) as wins
+        FROM teams t
+        JOIN games g ON (g.home_team_id = t.id OR g.away_team_id = t.id)
+        WHERE g.status = 'final'
+          AND g.game_date >= (SELECT game_date FROM games WHERE status='final' ORDER BY game_date DESC LIMIT 1 OFFSET :offset)
+        GROUP BY t.id, t.name, t.abbreviation
+        HAVING COUNT(*) >= 5
+        ORDER BY (SUM(CASE WHEN ABS(g.home_score - g.away_score) = 1 THEN 1 ELSE 0 END)::float / COUNT(*)) DESC
+    """), {"offset": last_n - 1}).fetchall()
+
+    for r in rows:
+        if r.gp and r.one_goal_games:
+            pct = r.one_goal_games / r.gp
+            if pct >= 0.6:
+                trends.append({
+                    "id": f"close_{r.abbreviation}",
+                    "category": "Game Margins",
+                    "title": f"{r.name} play it close every night",
+                    "description": (
+                        f"{r.one_goal_games} of {r.name}'s last {r.gp} games ({int(pct*100)}%) "
+                        f"were decided by exactly 1 goal — they won {r.wins} of them. "
+                        f"Dominant record, but rarely blowing anyone out."
+                    ),
+                    "severity": "info",
+                    "team": r.abbreviation,
+                })
+
+    # 5b. League-wide close game pace
     row = db.execute(text("""
-        SELECT COUNT(*) as ot_games,
+        SELECT COUNT(*) as close,
                (SELECT COUNT(*) FROM games WHERE status='final'
                 AND game_date >= (SELECT game_date FROM games WHERE status='final' ORDER BY game_date DESC LIMIT 1 OFFSET :offset)) as total
         FROM games
         WHERE status = 'final'
-          AND ABS(home_score - away_score) <= 1
+          AND ABS(home_score - away_score) = 1
           AND game_date >= (SELECT game_date FROM games WHERE status='final' ORDER BY game_date DESC LIMIT 1 OFFSET :offset)
     """), {"offset": last_n - 1}).fetchone()
 
     if row and row.total and row.total > 0:
-        pct = row.ot_games / row.total
-        if pct >= 0.5:
+        pct = row.close / row.total
+        if pct >= 0.55:
             trends.append({
-                "id": "close_games",
+                "id": "league_close",
                 "category": "League",
-                "title": "PWHL games are razor close",
-                "description": f"{row.ot_games} of the last {row.total} games ({int(pct*100)}%) were decided by 1 goal.",
+                "title": "PWHL is playing tight hockey",
+                "description": f"{row.close} of the last {row.total} league games ({int(pct*100)}%) were decided by exactly 1 goal.",
                 "severity": "info",
             })
 
