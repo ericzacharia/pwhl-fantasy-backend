@@ -32,8 +32,8 @@ def calculate_fantasy_points_default(stats: PlayerStats, position: str) -> float
     class DefaultScoring:
         goal_pts = 2.0
         assist_pts = 1.0
-        plus_minus_pts = 0.0
-        pim_pts = 0.0
+        plus_minus_pts = 0.5
+        pim_pts = -0.5
         shot_pts = 0.1
         hit_pts = 0.0
         block_pts = 0.0
