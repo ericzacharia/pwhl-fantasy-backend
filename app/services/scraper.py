@@ -15,10 +15,12 @@ STATS_API_BASE = "https://lscluster.hockeytech.com/feed/index.php"
 CLIENT_CODE = "pwhl"
 APP_KEY = "446521baf8c38984"
 LEAGUE_ID = "1"
-# HockeyTech season IDs (modulekit feed): 1=2024, 5=2024-2025, 8=2025-2026
-SEASON_ID = "8"           # current 2025-2026 season
-PREV_SEASON_ID = "5"      # previous 2024-2025 season
+# HockeyTech season IDs (modulekit feed): 1=2024 (inaugural), 5=2024-2025, 8=2025-2026
+SEASON_ID = "8"                 # current 2025-2026 season
+PREV_SEASON_ID = "5"            # previous 2024-2025 season
 PREV_SEASON_LABEL = "2024-2025"
+INAUGURAL_SEASON_ID = "1"       # inaugural 2024 season (Jan-May 2024)
+INAUGURAL_SEASON_LABEL = "2024"
 
 # Static color data keyed by team code from API
 TEAM_COLORS = {
@@ -690,4 +692,104 @@ async def run_prev_season_scrape(db) -> dict:
             logger.error(f"Prev season goalie error: {e}", exc_info=True)
 
     logger.info(f"Prev season scrape complete: {results}")
+    return results
+
+
+async def run_inaugural_season_scrape(db) -> dict:
+    """
+    Scrape 2024 inaugural season totals using season_id=1 (modulekit feed).
+    Stores stats with season label '2024'.
+    """
+    from app.models.player import Player, PlayerStats
+    import sqlalchemy
+
+    results = {"skaters": 0, "goalies": 0, "errors": []}
+    season_label = INAUGURAL_SEASON_LABEL
+
+    async with aiohttp.ClientSession() as session:
+        teams_raw = db.execute(sqlalchemy.text("SELECT id, abbreviation FROM pwhl_teams")).fetchall()
+        teams_by_abbr = {row[1]: row[0] for row in teams_raw}
+
+        def get_team_id(code: str):
+            mapped = TEAM_CODE_MAP.get(code, code)
+            return teams_by_abbr.get(mapped)
+
+        # --- 2024 Inaugural Skaters ---
+        try:
+            skater_data = await get_player_stats_from_api(session, season_id=INAUGURAL_SEASON_ID)
+            logger.info(f"Inaugural season skaters: {len(skater_data)} rows from API")
+            for raw in skater_data:
+                player_info = parse_player_from_stats(raw)
+                player_stats = parse_skater_stats(raw)
+                team_abbr = player_info.pop("team_abbreviation", "")
+
+                player = db.query(Player).filter_by(
+                    pwhl_player_id=player_info["pwhl_player_id"]
+                ).first()
+                if not player:
+                    player = Player(**player_info, pwhl_team_id=get_team_id(team_abbr))
+                    db.add(player)
+                    db.flush()
+
+                stat = db.query(PlayerStats).filter_by(
+                    player_id=player.id, season=season_label, is_season_total=True
+                ).first()
+                if not stat:
+                    stat = PlayerStats(player_id=player.id, season=season_label,
+                                       is_season_total=True, **player_stats)
+                    db.add(stat)
+                else:
+                    for k, v in player_stats.items():
+                        setattr(stat, k, v)
+
+                from app.services.scoring import calculate_fantasy_points_default
+                stat.fantasy_points = calculate_fantasy_points_default(stat, player.position)
+                results["skaters"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Inaugural skaters: {e}")
+            logger.error(f"Inaugural skater error: {e}", exc_info=True)
+
+        # --- 2024 Inaugural Goalies ---
+        try:
+            goalie_data = await get_goalie_stats_from_api(session, season_id=INAUGURAL_SEASON_ID)
+            logger.info(f"Inaugural season goalies: {len(goalie_data)} rows from API")
+            for raw in goalie_data:
+                player_info = parse_player_from_stats(raw)
+                player_info["position"] = "G"
+                goalie_stats = parse_goalie_stats(raw)
+                team_abbr = player_info.pop("team_abbreviation", "")
+
+                player = db.query(Player).filter_by(
+                    pwhl_player_id=player_info["pwhl_player_id"]
+                ).first()
+                if not player:
+                    player = Player(**player_info, pwhl_team_id=get_team_id(team_abbr))
+                    db.add(player)
+                    db.flush()
+                else:
+                    player.position = "G"
+
+                stat = db.query(PlayerStats).filter_by(
+                    player_id=player.id, season=season_label, is_season_total=True
+                ).first()
+                if not stat:
+                    stat = PlayerStats(player_id=player.id, season=season_label,
+                                       is_season_total=True, **goalie_stats)
+                    db.add(stat)
+                else:
+                    for k, v in goalie_stats.items():
+                        setattr(stat, k, v)
+
+                from app.services.scoring import calculate_fantasy_points_default
+                stat.fantasy_points = calculate_fantasy_points_default(stat, "G")
+                results["goalies"] += 1
+
+            db.commit()
+        except Exception as e:
+            results["errors"].append(f"Inaugural goalies: {e}")
+            logger.error(f"Inaugural goalie error: {e}", exc_info=True)
+
+    logger.info(f"Inaugural season scrape complete: {results}")
     return results

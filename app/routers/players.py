@@ -14,7 +14,6 @@ router = APIRouter(prefix="/players", tags=["players"])
 
 # Map short season labels (as used by iOS app) to canonical DB labels
 SEASON_ALIASES = {
-    "2024": "2024-2025",
     "2025": "2025-2026",
 }
 
