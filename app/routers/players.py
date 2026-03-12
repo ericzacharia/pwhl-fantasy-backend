@@ -111,6 +111,8 @@ def list_players(
     players = query.offset((page - 1) * page_size).limit(page_size).all()
 
     responses = [player_to_response(p, season=season) for p in players]
+    # Filter out players with no stats for the selected season
+    responses = [r for r in responses if r.season_stats is not None]
 
     if sort_by == "fantasy_value":
         responses.sort(key=lambda x: x.fantasy_value or 0, reverse=True)
