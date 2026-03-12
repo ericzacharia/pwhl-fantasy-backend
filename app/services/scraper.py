@@ -15,7 +15,8 @@ STATS_API_BASE = "https://lscluster.hockeytech.com/feed/index.php"
 CLIENT_CODE = "pwhl"
 APP_KEY = "446521baf8c38984"
 LEAGUE_ID = "1"
-SEASON_ID = "8"  # 2024-25 / 2025-26 season
+# HockeyTech season IDs (modulekit feed): 1=2024, 5=2024-2025, 8=2025-2026
+SEASON_ID = "8"  # current 2025-2026 season
 
 # Static color data keyed by team code from API
 TEAM_COLORS = {
