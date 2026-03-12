@@ -5,8 +5,11 @@ import logging
 
 from app.database import engine, Base
 from app.config import settings
+from app.routers import trends as trends_router
 from app.routers import analytics as analytics_router
+from app.routers import trends as trends_router
 from app.routers import fantasy as fantasy_router
+from app.routers import trends as trends_router
 from app.routers import auth, players, leagues, games, admin, pwhl
 
 logging.basicConfig(level=logging.INFO)
