@@ -49,7 +49,7 @@ Details: {trend['description']}
 Output ONLY the article body — no headline, no byline."""
 
     response = client.messages.create(
-        model="claude-haiku-4-5",
+        model="claude-opus-4-5",
         max_tokens=150,
         messages=[{"role": "user", "content": prompt}],
     )
