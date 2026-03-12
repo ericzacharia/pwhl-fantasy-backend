@@ -7,9 +7,7 @@ from app.database import engine, Base
 from app.config import settings
 from app.routers import trends as trends_router
 from app.routers import analytics as analytics_router
-from app.routers import trends as trends_router
 from app.routers import fantasy as fantasy_router
-from app.routers import trends as trends_router
 from app.routers import auth, players, leagues, games, admin, pwhl
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +23,7 @@ async def lifespan(app: FastAPI):
     # Start background scheduler
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
     from app.database import SessionLocal
-    from app.services.scraper import run_full_scrape
+    from app.services.scraper import run_full_scrape, run_pergame_scrape
     import asyncio
 
     scheduler = AsyncIOScheduler()
@@ -36,6 +34,9 @@ async def lifespan(app: FastAPI):
             logger.info("Running scheduled PWHL data scrape...")
             results = await run_full_scrape(db)
             logger.info(f"Scrape completed: {results}")
+            logger.info("Running per-game stats scrape...")
+            pg_results = await run_pergame_scrape(db)
+            logger.info(f"Per-game scrape completed: {pg_results}")
         except Exception as e:
             logger.error(f"Scheduled scrape failed: {e}")
         finally:
@@ -104,6 +105,7 @@ app.include_router(admin.router, prefix="/api/v1")
 app.include_router(pwhl.router, prefix="/api/v1")
 app.include_router(analytics_router.router, prefix="/api/v1")
 app.include_router(fantasy_router.router, prefix="/api/v1")
+app.include_router(trends_router.router, prefix="/api/v1")
 
 
 @app.get("/")

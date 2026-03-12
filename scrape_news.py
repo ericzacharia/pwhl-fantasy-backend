@@ -8,7 +8,7 @@ Sources:
 import sys, asyncio, httpx, json
 from bs4 import BeautifulSoup
 
-sys.path.insert(0, "/Users/eric/Desktop/2-Career/projects/PWHLFantasy/backend")
+sys.path.insert(0, "/app")
 from app.database import SessionLocal
 from app.models.news import NewsArticle
 

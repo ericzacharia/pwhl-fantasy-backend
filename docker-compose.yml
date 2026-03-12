@@ -8,17 +8,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./pwhl_fantasy.sql:/docker-entrypoint-initdb.d/seed.sql
-    ports:
-      - "5432:5432"
+    restart: unless-stopped
   api:
     build: .
     ports:
       - "8080:8080"
     depends_on:
       - db
-    environment:
-      DATABASE_URL: postgresql://pwhl:pwhlpass@db:5432/pwhl_fantasy
-      SECRET_KEY: changeme32charslongrandomstring1
+    env_file: .env
     restart: unless-stopped
 volumes:
   pgdata:

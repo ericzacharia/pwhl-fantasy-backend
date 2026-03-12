@@ -190,6 +190,179 @@ def parse_game_status(g: dict) -> str:
     return "scheduled"
 
 
+GAME_SUMMARY_BASE = "https://lscluster.hockeytech.com/feed/index.php"
+
+
+async def get_game_summary(session: aiohttp.ClientSession, pwhl_game_id: str) -> Optional[dict]:
+    """Fetch full game summary (with per-player box score) via statviewfeed."""
+    params = {
+        "feed": "statviewfeed",
+        "view": "gameSummary",
+        "game_id": pwhl_game_id,
+        "key": APP_KEY,
+        "client_code": CLIENT_CODE,
+        "lang": "en",
+    }
+    try:
+        async with session.get(GAME_SUMMARY_BASE, params=params,
+                               timeout=aiohttp.ClientTimeout(total=30)) as resp:
+            if resp.status != 200:
+                return None
+            text = (await resp.text()).strip()
+            # Response is JSONP-wrapped: (...) — strip parens
+            if text.startswith("(") and text.endswith(")"):
+                text = text[1:-1]
+            import json
+            return json.loads(text)
+    except Exception as e:
+        logger.error(f"get_game_summary({pwhl_game_id}): {e}")
+        return None
+
+
+def parse_skater_game_stats(stats: dict) -> dict:
+    """Parse skater stats dict from gameSummary response (camelCase keys)."""
+    return {
+        "goals": _int(stats.get("goals")),
+        "assists": _int(stats.get("assists")),
+        "points": _int(stats.get("points")),
+        "plus_minus": _int(stats.get("plusMinus")),
+        "penalty_minutes": _int(stats.get("penaltyMinutes")),
+        "shots": _int(stats.get("shots")),
+        "hits": _int(stats.get("hits")),
+        "blocks": _int(stats.get("blockedShots")),
+        "faceoffs_won": _int(stats.get("faceoffWins")),
+        "faceoffs_total": _int(stats.get("faceoffAttempts")),
+        "games_played": 1,
+    }
+
+
+def parse_goalie_game_stats(stats: dict, is_ot: bool = False, is_so: bool = False) -> dict:
+    """Parse goalie stats dict from gameSummary response (camelCase keys)."""
+    shots = _int(stats.get("shotsAgainst"))
+    saves = _int(stats.get("saves"))
+    ga = _int(stats.get("goalsAgainst"))
+    sv_pct = saves / shots if shots > 0 else 0.0
+    # Shutout: goalie played and allowed 0 goals (simplified — box score doesn't give W/L directly)
+    shutout = 1 if saves > 0 and ga == 0 else 0
+    return {
+        "shots_against": shots,
+        "saves": saves,
+        "goals_against": ga,
+        "shutouts": shutout,
+        "save_percentage": round(sv_pct, 4),
+        "games_played": 1,
+    }
+
+
+async def run_pergame_scrape(db) -> dict:
+    """
+    Scrape per-game player stats for all final games this season.
+    Uses statviewfeed/gameSummary (one call per game, returns all players).
+    Skips games already fully scraped. Idempotent.
+    """
+    from app.models.player import Player, PlayerStats
+    from app.models.game import Game
+
+    results = {"games_processed": 0, "rows_inserted": 0, "errors": []}
+
+    # Build player lookup: pwhl_player_id (str) -> Player
+    players_by_api_id: dict[str, Player] = {
+        str(p.pwhl_player_id): p
+        for p in db.query(Player).filter(Player.pwhl_player_id.isnot(None)).all()
+    }
+
+    # Only scrape final games for this season
+    games = (
+        db.query(Game)
+        .filter(Game.status == "final", Game.season == "2025-2026")
+        .order_by(Game.game_date.asc())
+        .all()
+    )
+    logger.info(f"Per-game scrape: {len(games)} final games to process")
+
+    async with aiohttp.ClientSession() as session:
+        batch_size = 5  # 5 concurrent game fetches
+        for batch_start in range(0, len(games), batch_size):
+            batch = games[batch_start:batch_start + batch_size]
+            summaries = await asyncio.gather(
+                *[get_game_summary(session, g.pwhl_game_id) for g in batch]
+            )
+
+            for game, summary in zip(batch, summaries):
+                if not summary:
+                    results["errors"].append(f"No summary for game {game.pwhl_game_id}")
+                    continue
+
+                try:
+                    is_ot = bool(game.is_overtime)
+                    is_so = bool(game.is_shootout)
+
+                    for side in ("homeTeam", "visitingTeam"):
+                        team_data = summary.get(side, {})
+
+                        for skater in team_data.get("skaters", []):
+                            info = skater.get("info", {})
+                            api_pid = str(info.get("id", ""))
+                            player = players_by_api_id.get(api_pid)
+                            if not player:
+                                continue
+
+                            existing = db.query(PlayerStats).filter_by(
+                                player_id=player.id, game_id=game.id, is_season_total=False
+                            ).first()
+                            if existing:
+                                continue
+
+                            stat_data = parse_skater_game_stats(skater.get("stats", {}))
+                            db.add(PlayerStats(
+                                player_id=player.id,
+                                season="2025-2026",
+                                game_id=game.id,
+                                is_season_total=False,
+                                fantasy_points=None,
+                                **stat_data,
+                            ))
+                            results["rows_inserted"] += 1
+
+                        for goalie in team_data.get("goalies", []):
+                            info = goalie.get("info", {})
+                            api_pid = str(info.get("id", ""))
+                            player = players_by_api_id.get(api_pid)
+                            if not player:
+                                continue
+
+                            existing = db.query(PlayerStats).filter_by(
+                                player_id=player.id, game_id=game.id, is_season_total=False
+                            ).first()
+                            if existing:
+                                continue
+
+                            stat_data = parse_goalie_game_stats(
+                                goalie.get("stats", {}), is_ot, is_so
+                            )
+                            db.add(PlayerStats(
+                                player_id=player.id,
+                                season="2025-2026",
+                                game_id=game.id,
+                                is_season_total=False,
+                                fantasy_points=None,
+                                **stat_data,
+                            ))
+                            results["rows_inserted"] += 1
+
+                    results["games_processed"] += 1
+
+                except Exception as e:
+                    results["errors"].append(f"Game {game.pwhl_game_id}: {e}")
+                    logger.error(f"Per-game scrape error for game {game.pwhl_game_id}: {e}", exc_info=True)
+
+            db.commit()
+            await asyncio.sleep(0.2)
+
+    logger.info(f"Per-game scrape complete: {results}")
+    return results
+
+
 async def run_full_scrape(db) -> dict:
     """Run a full scrape and update the database."""
     from app.models.team import PWHLTeam

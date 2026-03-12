@@ -12,6 +12,8 @@ def calculate_fantasy_points(stats: PlayerStats, scoring: ScoringSettings, posit
         pts += stats.goals_against * scoring.goals_against_pts
         pts += stats.shutouts * scoring.shutout_pts
         pts += stats.losses * scoring.goalie_loss_pts
+        otl_pts = getattr(scoring, 'overtime_loss_pts', 0.0)
+        pts += (stats.overtime_losses or 0) * otl_pts
     else:
         pts += stats.goals * scoring.goal_pts
         pts += stats.assists * scoring.assist_pts
@@ -28,18 +30,19 @@ def calculate_fantasy_points_default(stats: PlayerStats, position: str) -> float
     """Calculate using default scoring settings."""
 
     class DefaultScoring:
-        goal_pts = 3.0
-        assist_pts = 2.0
-        plus_minus_pts = 1.0
-        pim_pts = -0.5
-        shot_pts = 0.3
+        goal_pts = 2.0
+        assist_pts = 1.0
+        plus_minus_pts = 0.0
+        pim_pts = 0.0
+        shot_pts = 0.1
         hit_pts = 0.0
         block_pts = 0.0
-        goalie_win_pts = 5.0
+        goalie_win_pts = 4.0
         goalie_save_pts = 0.2
-        goals_against_pts = -1.0
+        goals_against_pts = -2.0
         shutout_pts = 3.0
         goalie_loss_pts = 0.0
+        overtime_loss_pts = 1.0
 
     return calculate_fantasy_points(stats, DefaultScoring(), position)
 

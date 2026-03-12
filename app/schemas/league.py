@@ -18,18 +18,19 @@ class LeagueJoin(BaseModel):
 
 
 class ScoringSettingsUpdate(BaseModel):
-    goal_pts: float = 3.0
-    assist_pts: float = 2.0
-    plus_minus_pts: float = 1.0
-    pim_pts: float = -0.5
-    shot_pts: float = 0.3
+    goal_pts: float = 2.0
+    assist_pts: float = 1.0
+    plus_minus_pts: float = 0.0
+    pim_pts: float = 0.0
+    shot_pts: float = 0.1
     hit_pts: float = 0.0
     block_pts: float = 0.0
-    goalie_win_pts: float = 5.0
+    goalie_win_pts: float = 4.0
     goalie_save_pts: float = 0.2
-    goals_against_pts: float = -1.0
+    goals_against_pts: float = -2.0
     shutout_pts: float = 3.0
     goalie_loss_pts: float = 0.0
+    overtime_loss_pts: float = 1.0
 
 
 class ScoringSettingsResponse(ScoringSettingsUpdate):

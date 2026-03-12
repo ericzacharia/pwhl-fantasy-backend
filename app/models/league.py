@@ -70,20 +70,21 @@ class ScoringSettings(Base):
     league_id = Column(Integer, ForeignKey("leagues.id"), unique=True)
 
     # Skater scoring
-    goal_pts = Column(Float, default=3.0)
-    assist_pts = Column(Float, default=2.0)
-    plus_minus_pts = Column(Float, default=1.0)
-    pim_pts = Column(Float, default=-0.5)
-    shot_pts = Column(Float, default=0.3)
+    goal_pts = Column(Float, default=2.0)
+    assist_pts = Column(Float, default=1.0)
+    plus_minus_pts = Column(Float, default=0.0)
+    pim_pts = Column(Float, default=0.0)
+    shot_pts = Column(Float, default=0.1)
     hit_pts = Column(Float, default=0.0)
     block_pts = Column(Float, default=0.0)
 
     # Goalie scoring
-    goalie_win_pts = Column(Float, default=5.0)
+    goalie_win_pts = Column(Float, default=4.0)
     goalie_save_pts = Column(Float, default=0.2)
-    goals_against_pts = Column(Float, default=-1.0)
+    goals_against_pts = Column(Float, default=-2.0)
     shutout_pts = Column(Float, default=3.0)
     goalie_loss_pts = Column(Float, default=0.0)
+    overtime_loss_pts = Column(Float, default=1.0)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
