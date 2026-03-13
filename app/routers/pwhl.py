@@ -53,15 +53,19 @@ def get_standings(
         away["ga"] += game.home_score
 
         is_ot = game.is_overtime or game.is_shootout
+        is_playoffs = "playoffs" in season
 
-        # PWHL uses 3-2-1-0 point system:
-        # Regulation win = 3 pts, OT/SO win = 2 pts, OTL = 1 pt, regulation loss = 0 pts
         if game.home_score > game.away_score:
             if is_ot:
                 home["otw"] += 1
-                home["pts"] += 2
-                away["otl"] += 1
-                away["pts"] += 1
+                # Playoffs: all wins = 3 pts, no OTL for loser
+                # Regular season: OTW = 2 pts, OTL = 1 pt
+                home["pts"] += 3 if is_playoffs else 2
+                if is_playoffs:
+                    away["l"] += 1
+                else:
+                    away["otl"] += 1
+                    away["pts"] += 1
             else:
                 home["w"] += 1
                 home["pts"] += 3
@@ -69,9 +73,12 @@ def get_standings(
         else:
             if is_ot:
                 away["otw"] += 1
-                away["pts"] += 2
-                home["otl"] += 1
-                home["pts"] += 1
+                away["pts"] += 3 if is_playoffs else 2
+                if is_playoffs:
+                    home["l"] += 1
+                else:
+                    home["otl"] += 1
+                    home["pts"] += 1
             else:
                 away["w"] += 1
                 away["pts"] += 3
