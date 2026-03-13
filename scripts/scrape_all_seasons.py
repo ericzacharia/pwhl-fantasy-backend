@@ -23,7 +23,7 @@ SEASON_MAP = {
     "6": "2025-playoffs",
     "7": "2025-26-preseason", "8": "2025-2026",
 }
-TEAM_MAP = {"BOS":"BOS","MIN":"MIN","MTL":"MTL","NY":"NY","NYR":"NYR",
+TEAM_MAP = {"BOS":"BOS","MIN":"MIN","MTL":"MTL","NY":"NYR","NYR":"NYR",
             "OTT":"OTT","TOR":"TOR","SEA":"SEA","VAN":"VAN"}
 
 async def run():
