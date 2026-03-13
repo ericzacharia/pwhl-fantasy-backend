@@ -50,12 +50,22 @@ async def run():
         try: gd = datetime.strptime(g.get("Date", ""), "%Y-%m-%d").date()
         except: continue
 
+        period = int(g.get("Period") or 0)
+        is_ot = period == 4
+        is_so = period == 5
+        period_name = g.get("PeriodNameShort", "")
+        if period_name in ("OT", "4"): is_ot = True
+        if period_name in ("SO", "5"): is_ot, is_so = False, True
+
         vals = dict(season=season, game_date=gd,
                     home_team_id=ht.id if ht else None,
                     away_team_id=at.id if at else None,
                     home_score=int(g.get("HomeGoals") or 0),
                     away_score=int(g.get("VisitorGoals") or 0),
-                    status=status)
+                    status=status,
+                    period=period or None,
+                    is_overtime=is_ot,
+                    is_shootout=is_so)
         ex = db.query(Game).filter_by(pwhl_game_id=gid).first()
         if ex:
             for k, v in vals.items(): setattr(ex, k, v)

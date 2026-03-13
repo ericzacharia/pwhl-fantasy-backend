@@ -54,28 +54,32 @@ def get_standings(
 
         is_ot = game.is_overtime or game.is_shootout
 
+        # PWHL uses 3-2-1-0 point system:
+        # Regulation win = 3 pts, OT/SO win = 2 pts, OTL = 1 pt, regulation loss = 0 pts
         if game.home_score > game.away_score:
-            home["w"] += 1
-            if is_ot: home["otw"] += 1
-            home["pts"] += 3 if not is_ot else 2  # W=3, OTW=2
             if is_ot:
+                home["otw"] += 1
+                home["pts"] += 2
                 away["otl"] += 1
                 away["pts"] += 1
             else:
+                home["w"] += 1
+                home["pts"] += 3
                 away["l"] += 1
         else:
-            away["w"] += 1
-            if is_ot: away["otw"] += 1
-            away["pts"] += 3 if not is_ot else 2  # W=3, OTW=2
             if is_ot:
+                away["otw"] += 1
+                away["pts"] += 2
                 home["otl"] += 1
                 home["pts"] += 1
             else:
+                away["w"] += 1
+                away["pts"] += 3
                 home["l"] += 1
 
     result = sorted(
         standings.values(),
-        key=lambda x: (-x["pts"], -x["w"], -(x["gf"] - x["ga"]))
+        key=lambda x: (-x["pts"], -(x["w"] + x["otw"]), -(x["gf"] - x["ga"]))
     )
     return result
 

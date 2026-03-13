@@ -186,6 +186,18 @@ def parse_goalie_stats(raw: dict) -> dict:
     }
 
 
+def _season_from_date(game_date) -> str:
+    """Derive the correct season label from a game date."""
+    from datetime import date as date_type
+    if isinstance(game_date, str):
+        game_date = datetime.strptime(game_date, "%Y-%m-%d").date()
+    if game_date >= date_type(2025, 11, 1):
+        return "2025-2026"
+    if game_date >= date_type(2024, 12, 1):
+        return "2024-2025"
+    return "2024-preseason"
+
+
 def parse_game_status(g: dict) -> str:
     status_str = g.get("GameStatusString", "").lower()
     if "final" in status_str:
@@ -551,16 +563,21 @@ async def run_full_scrape(db) -> dict:
                 period = _int(period_str) if period_str else None
                 game_clock = g.get("GameClock", "")
 
-                # Detect OT/SO from period name
+                # Detect OT/SO from period name or period number
                 period_name = g.get("PeriodNameShort", "")
-                is_overtime = period_name in ("OT", "4")
-                is_shootout = period_name in ("SO", "5")
+                is_overtime = period_name in ("OT", "4") or period == 4
+                is_shootout = period_name in ("SO", "5") or period == 5
+                # OT and SO are mutually exclusive
+                if is_shootout:
+                    is_overtime = False
+
+                season_label = _season_from_date(game_date)
 
                 existing = db.query(Game).filter_by(pwhl_game_id=game_id).first()
                 if not existing:
                     game = Game(
                         pwhl_game_id=game_id,
-                        season="2025-2026",
+                        season=season_label,
                         game_date=game_date,
                         game_time=game_time,
                         home_team_id=home_team.id if home_team else None,
@@ -577,7 +594,7 @@ async def run_full_scrape(db) -> dict:
                     db.add(game)
                 else:
                     existing.status = status
-                    existing.season = "2025-2026"   # correct any mis-tagged rows
+                    existing.season = season_label  # derived from game_date — safe to correct mis-tagged rows
                     existing.home_score = _int(g.get("HomeGoals", 0))
                     existing.away_score = _int(g.get("VisitorGoals", 0))
                     existing.period = period
