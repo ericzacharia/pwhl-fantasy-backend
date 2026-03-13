@@ -56,7 +56,7 @@ def get_standings(
 
         if game.home_score > game.away_score:
             home["w"] += 1
-            home["pts"] += 2
+            home["pts"] += 3 if not is_ot else 2  # W=3, OTW=2
             if is_ot:
                 away["otl"] += 1
                 away["pts"] += 1
@@ -64,7 +64,7 @@ def get_standings(
                 away["l"] += 1
         else:
             away["w"] += 1
-            away["pts"] += 2
+            away["pts"] += 3 if not is_ot else 2  # W=3, OTW=2
             if is_ot:
                 home["otl"] += 1
                 home["pts"] += 1
