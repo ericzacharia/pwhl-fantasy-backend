@@ -19,8 +19,123 @@ from app.models.news import NewsArticle
 
 API_BASE = os.getenv("PWHL_API_BASE", "http://localhost:8080/api/v1")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-THUMBNAIL_URL = "https://unsupervisedbias.com/ub-trend-thumbnail.jpg"
+PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 DICEBEAR_BASE = "https://api.dicebear.com/9.x/avataaars/png?size=96"
+
+# ── Curated stock image pool (Wikimedia Commons, free licence) ─────────────────
+# Organized by trend category. Used as fallback when PEXELS_API_KEY is not set.
+_WC = "https://upload.wikimedia.org/wikipedia/commons/thumb"
+IMAGE_POOL = {
+    "action": [
+        f"{_WC}/8/87/20220430_AUTSVK_026.jpg/960px-20220430_AUTSVK_026.jpg",
+        f"{_WC}/1/18/20220430_FRANOR_001.jpg/960px-20220430_FRANOR_001.jpg",
+        f"{_WC}/0/08/20220430_FRANOR_015.jpg/960px-20220430_FRANOR_015.jpg",
+        f"{_WC}/1/1c/20220430_FRANOR_018.jpg/960px-20220430_FRANOR_018.jpg",
+        f"{_WC}/9/9f/240110_Minnesota_Toronto_JohnMc001_%2853469194361%29.jpg/960px-240110_Minnesota_Toronto_JohnMc001_%2853469194361%29.jpg",
+        f"{_WC}/5/58/240110_Minnesota_Toronto_JohnMc086_%2853469194231%29.jpg/960px-240110_Minnesota_Toronto_JohnMc086_%2853469194231%29.jpg",
+        f"{_WC}/0/0a/240110_Minnesota_Toronto_JohnMc087_%2853469512754%29.jpg/960px-240110_Minnesota_Toronto_JohnMc087_%2853469512754%29.jpg",
+        f"{_WC}/6/6b/240313_MN_Boston_JohnMc02_%2853585744432%29.jpg/960px-240313_MN_Boston_JohnMc02_%2853585744432%29.jpg",
+        f"{_WC}/6/67/240313_MN_Boston_JohnMc03_%2853587056535%29.jpg/960px-240313_MN_Boston_JohnMc03_%2853587056535%29.jpg",
+        f"{_WC}/d/d4/240313_MN_Boston_JohnMc06_%2853587056470%29.jpg/960px-240313_MN_Boston_JohnMc06_%2853587056470%29.jpg",
+        f"{_WC}/1/1d/240313_MN_Boston_JohnMc08_%2853586608046%29.jpg/960px-240313_MN_Boston_JohnMc08_%2853586608046%29.jpg",
+        f"{_WC}/0/01/CWHL_Toronto_Furies_vs_Boston_Blades_2016-10-15_%2830305359901%29.jpg/960px-CWHL_Toronto_Furies_vs_Boston_Blades_2016-10-15_%2830305359901%29.jpg",
+    ],
+    "players": [
+        f"{_WC}/3/3f/Taylor_Heise_2024.jpg/500px-Taylor_Heise_2024.jpg",
+        f"{_WC}/0/00/Sidney_Morin_2024.jpg/500px-Sidney_Morin_2024.jpg",
+        f"{_WC}/6/62/Taylor_Girard_2024.jpg/500px-Taylor_Girard_2024.jpg",
+        f"{_WC}/5/59/Emily_Brown_%28ice_hockey%29.jpg/960px-Emily_Brown_%28ice_hockey%29.jpg",  # noqa
+        f"{_WC}/d/dd/Brittany_Howard_%28ice_hockey%29.jpg/960px-Brittany_Howard_%28ice_hockey%29.jpg",  # noqa
+        f"{_WC}/4/4d/Hannah_Miller_%28ice_hockey%29_2024.jpg/960px-Hannah_Miller_%28ice_hockey%29_2024.jpg",  # noqa
+        f"{_WC}/8/86/Maureen_Murphy_%28ice_hockey%29_2024.jpg/960px-Maureen_Murphy_%28ice_hockey%29_2024.jpg",  # noqa
+        f"{_WC}/3/3b/GOypMAXXkAAKYXC.jpg/960px-GOypMAXXkAAKYXC.jpg",
+    ],
+    "goalie": [
+        f"{_WC}/3/38/Elaine_Chuli.jpg/500px-Elaine_Chuli.jpg",
+        f"{_WC}/a/a1/Emma_S%C3%B6derberg_2024.jpg/330px-Emma_S%C3%B6derberg_2024.jpg",
+        f"{_WC}/5/5f/SarahTueting2002Olympics.jpg/330px-SarahTueting2002Olympics.jpg",
+        f"{_WC}/6/62/Kim_Martin_2.jpg/960px-Kim_Martin_2.jpg",
+    ],
+    "team": [
+        f"{_WC}/5/50/Canadian_womens_bench_2011-04-25.jpg/960px-Canadian_womens_bench_2011-04-25.jpg",
+        f"{_WC}/f/f0/PWHL_Reception_at_Lornado_-_January_2024_%2853452041893%29.jpg/960px-PWHL_Reception_at_Lornado_-_January_2024_%2853452041893%29.jpg",  # noqa
+        f"{_WC}/5/59/PWHL_Reception_at_Lornado_-_January_2024_%2853452041953%29.jpg/960px-PWHL_Reception_at_Lornado_-_January_2024_%2853452041953%29.jpg",  # noqa
+    ],
+}
+
+# Map trend categories to image pools
+CATEGORY_IMAGE_MAP = {
+    "Standings":       "team",
+    "Team Dominance":  "action",
+    "Team Defense":    "action",
+    "Recent Form":     "action",
+    "Discipline":      "action",
+    "Home/Away":       "action",
+    "Hot Players":     "players",
+    "Scoring":         "players",
+    "Playmaking":      "players",
+    "Two-Way Play":    "players",
+    "Shooting":        "players",
+    "Fantasy":         "players",
+    "Goaltending":     "goalie",
+    "Defense":         "goalie",
+    "Physical Play":   "action",
+    "Special Teams":   "action",
+    "Clutch Play":     "action",
+    "Interesting Stories": "action",
+}
+
+_used_images: list[str] = []  # track recently used to reduce repeats
+
+
+def get_image_for_trend(trend: dict) -> str:
+    """
+    Return a stock image URL for the given trend.
+    1. Tries Pexels API if PEXELS_API_KEY is set.
+    2. Falls back to curated Wikimedia Commons pool by category.
+    """
+    category = trend.get("category", "")
+
+    # ── Pexels API ──────────────────────────────────────────────────────────────
+    if PEXELS_API_KEY:
+        keywords = {
+            "Goaltending": "women ice hockey goalie",
+            "Defense": "ice hockey women defense",
+            "Team Dominance": "ice hockey women goal celebration",
+            "Recent Form": "ice hockey women game action",
+            "Hot Players": "women ice hockey player skating",
+            "Scoring": "women ice hockey goal",
+            "Fantasy": "ice hockey women stats",
+        }
+        query = keywords.get(category, "women ice hockey PWHL game")
+        try:
+            resp = requests.get(
+                "https://api.pexels.com/v1/search",
+                headers={"Authorization": PEXELS_API_KEY},
+                params={"query": query, "per_page": 15, "orientation": "landscape"},
+                timeout=8,
+            )
+            if resp.status_code == 200:
+                photos = resp.json().get("photos", [])
+                if photos:
+                    import random
+                    photo = random.choice(photos)
+                    return photo["src"]["large"]
+        except Exception:
+            pass  # fall through to curated pool
+
+    # ── Curated fallback ─────────────────────────────────────────────────────────
+    pool_key = CATEGORY_IMAGE_MAP.get(category, "action")
+    pool = IMAGE_POOL[pool_key][:]  # copy so we don't mutate
+
+    # Prefer images not recently used
+    fresh = [u for u in pool if u not in _used_images[-6:]]
+    candidates = fresh if fresh else pool
+
+    import random
+    chosen = random.choice(candidates)
+    _used_images.append(chosen)
+    return chosen
 
 # ── Author personas ────────────────────────────────────────────────────────────
 AUTHORS = [
@@ -183,8 +298,8 @@ def run():
                 url=url,
                 summary=body,
                 date_str=today,
-                thumbnail=THUMBNAIL_URL,
-                fallback_image=THUMBNAIL_URL,
+                thumbnail=get_image_for_trend(trend),
+                fallback_image="https://unsupervisedbias.com/ub-trend-thumbnail.jpg",
                 player_image_url=author["avatar"],  # author headshot
             ))
             inserted += 1
