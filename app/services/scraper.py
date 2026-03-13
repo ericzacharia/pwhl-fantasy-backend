@@ -45,7 +45,7 @@ TEAM_CODE_MAP = {
 
 async def fetch_json(session: aiohttp.ClientSession, url: str, params: dict = None) -> Optional[dict]:
     try:
-        async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+        async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=60)) as resp:
             if resp.status == 200:
                 return await resp.json(content_type=None)
     except Exception as e:
@@ -210,7 +210,7 @@ async def get_game_summary(session: aiohttp.ClientSession, pwhl_game_id: str) ->
     }
     try:
         async with session.get(GAME_SUMMARY_BASE, params=params,
-                               timeout=aiohttp.ClientTimeout(total=30)) as resp:
+                               timeout=aiohttp.ClientTimeout(total=60)) as resp:
             if resp.status != 200:
                 return None
             text = (await resp.text()).strip()
