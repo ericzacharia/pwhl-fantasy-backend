@@ -35,7 +35,7 @@ def get_standings(
             "logo_url": team.logo_url,
             "primary_color": team.primary_color,
             "secondary_color": team.secondary_color,
-            "gp": 0, "w": 0, "l": 0, "otl": 0, "pts": 0, "gf": 0, "ga": 0,
+            "gp": 0, "w": 0, "otw": 0, "l": 0, "otl": 0, "pts": 0, "gf": 0, "ga": 0,
         }
 
     for game in games:
@@ -56,6 +56,7 @@ def get_standings(
 
         if game.home_score > game.away_score:
             home["w"] += 1
+            if is_ot: home["otw"] += 1
             home["pts"] += 3 if not is_ot else 2  # W=3, OTW=2
             if is_ot:
                 away["otl"] += 1
@@ -64,6 +65,7 @@ def get_standings(
                 away["l"] += 1
         else:
             away["w"] += 1
+            if is_ot: away["otw"] += 1
             away["pts"] += 3 if not is_ot else 2  # W=3, OTW=2
             if is_ot:
                 home["otl"] += 1
