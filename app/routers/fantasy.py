@@ -44,6 +44,9 @@ def _roster_entry_dict(entry):
         "goals": stat.goals if stat else 0,
         "assists": stat.assists if stat else 0,
         "games_played": stat.games_played if stat else 0,
+        "plus_minus": stat.plus_minus if stat else 0,
+        "shots": stat.shots if stat else 0,
+        "penalty_minutes": stat.penalty_minutes if stat else 0,
     }
 
 
