@@ -745,6 +745,153 @@ def fantasy_make_pick(
     return {"message": "Pick made", "player_id": player_id, "pick_number": current_pick.pick_number}
 
 
+@router.get("/leagues/{league_id}/schedule")
+def get_league_schedule(
+    league_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """
+    Generate a round-robin schedule for the league and return weekly matchups
+    with computed fantasy point totals for past weeks.
+    """
+    import datetime
+    from app.models.game import Game as GameModel
+    from app.models.league import ScoringSettings
+    from app.services.scoring import calculate_fantasy_points
+
+    league = db.query(League).filter_by(id=league_id).first()
+    if not league:
+        raise HTTPException(status_code=404, detail="League not found")
+
+    teams = db.query(FantasyTeam).filter_by(league_id=league_id).order_by(FantasyTeam.id).all()
+    if not teams:
+        return []
+
+    SEASON_START = datetime.date(2025, 10, 1)
+    SEASON = "2025-2026"
+    today = datetime.date.today()
+
+    # Use default scoring (DB scoring_settings may have missing columns)
+    scoring = None
+
+    class DefaultScoring:
+        goal_pts = 2.0
+        assist_pts = 1.0
+        plus_minus_pts = 0.5
+        pim_pts = -0.5
+        shot_pts = 0.1
+        hit_pts = 0.0
+        block_pts = 0.0
+        goalie_win_pts = 4.0
+        goalie_save_pts = 0.2
+        goals_against_pts = -2.0
+        shutout_pts = 3.0
+        goalie_loss_pts = 0.0
+        overtime_loss_pts = 1.0
+
+    if not scoring:
+        scoring = DefaultScoring()
+
+    roster_cache = {}
+    for team in teams:
+        entries = db.query(FantasyRoster).filter_by(fantasy_team_id=team.id, is_active=True).all()
+        roster_cache[team.id] = {e.player_id for e in entries}
+
+    def compute_team_points(team_id, start_date, end_date):
+        player_ids = roster_cache.get(team_id, set())
+        if not player_ids:
+            return 0.0
+        game_ids = [
+            g.id for g in db.query(GameModel).filter(
+                GameModel.season == SEASON,
+                GameModel.game_date >= start_date,
+                GameModel.game_date <= end_date,
+                GameModel.status == "final",
+            ).all()
+        ]
+        if not game_ids:
+            return 0.0
+        stats = (
+            db.query(PlayerStats)
+            .options(joinedload(PlayerStats.player))
+            .filter(
+                PlayerStats.player_id.in_(player_ids),
+                PlayerStats.game_id.in_(game_ids),
+                PlayerStats.is_season_total == False,
+            )
+            .all()
+        )
+        total = 0.0
+        for stat in stats:
+            pos = stat.player.position if stat.player else "F"
+            total += calculate_fantasy_points(stat, scoring, pos)
+        return round(total, 2)
+
+    team_list = list(teams)
+    if len(team_list) % 2 == 1:
+        team_list.append(None)
+    N = len(team_list)
+    num_rounds = N - 1
+
+    weeks_result = []
+    fixed = team_list[1:]
+
+    for round_idx in range(num_rounds):
+        week_num = round_idx + 1
+        week_start = SEASON_START + datetime.timedelta(weeks=round_idx)
+        week_end = week_start + datetime.timedelta(days=6)
+
+        is_past = week_end < today
+        is_current = week_start <= today <= week_end
+
+        rotation = [team_list[0]] + fixed
+
+        matchups = []
+        for i in range(N // 2):
+            home = rotation[i]
+            away = rotation[N - 1 - i]
+            if home is None or away is None:
+                continue
+            if is_past or is_current:
+                home_score = compute_team_points(home.id, week_start, week_end)
+                away_score = compute_team_points(away.id, week_start, week_end)
+                is_complete = is_past
+                if home_score > away_score:
+                    winner_id = home.id
+                elif away_score > home_score:
+                    winner_id = away.id
+                else:
+                    winner_id = None
+            else:
+                home_score = None
+                away_score = None
+                winner_id = None
+                is_complete = False
+
+            matchups.append({
+                "home_team_id": home.id,
+                "home_team_name": home.name,
+                "home_score": home_score,
+                "away_team_id": away.id,
+                "away_team_name": away.name,
+                "away_score": away_score,
+                "winner_team_id": winner_id,
+                "is_complete": is_complete,
+            })
+
+        weeks_result.append({
+            "week": week_num,
+            "start_date": week_start.isoformat(),
+            "end_date": week_end.isoformat(),
+            "matchups": matchups,
+        })
+
+        fixed = [fixed[-1]] + fixed[:-1]
+
+    return weeks_result
+
+
 @router.get("/players/available/{league_id}")
 def fantasy_available_players(
     league_id: int,
