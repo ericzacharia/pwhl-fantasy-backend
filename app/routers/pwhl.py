@@ -15,6 +15,21 @@ from app.models.user import User
 
 router = APIRouter(prefix="/pwhl", tags=["pwhl"])
 
+# Canonical season list matching thepwhl.com standings dropdown (in display order)
+STANDINGS_SEASONS = [
+    {"value": "2025-2026",         "label": "2025-26 Regular Season"},
+    {"value": "2025-playoffs",     "label": "2025 Playoffs"},
+    {"value": "2024-2025",         "label": "2024-25 Regular Season"},
+    {"value": "2024-25-preseason", "label": "2024-25 Preseason"},
+    {"value": "2024",              "label": "2024 Regular Season"},
+    {"value": "2024-preseason",    "label": "2024 Preseason"},
+]
+
+@router.get("/standings/seasons")
+def get_standings_seasons():
+    """Return the list of seasons available in the standings dropdown, matching thepwhl.com."""
+    return STANDINGS_SEASONS
+
 
 @router.get("/standings")
 def get_standings(

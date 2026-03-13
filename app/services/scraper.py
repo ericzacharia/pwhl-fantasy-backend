@@ -36,7 +36,7 @@ TEAM_COLORS = {
 
 # Maps API team code -> DB abbreviation
 TEAM_CODE_MAP = {
-    "BOS": "BOS", "MIN": "MIN", "MTL": "MTL",
+    "BOS": "BOS", "MIN": "MIN", "MTL": "MTL", "MON": "MTL",  # MON used in early API
     "NY": "NYR", "NYR": "NYR",  # NY Sirens - DB uses "NYR"
     "OTT": "OTT", "TOR": "TOR",
     "SEA": "SEA", "VAN": "VAN",
