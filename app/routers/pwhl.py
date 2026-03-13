@@ -138,6 +138,43 @@ def get_upcoming_games(
     ]
 
 
+@router.get("/articles")
+async def get_ai_articles(
+    page: int = 1,
+    page_size: int = 20,
+    db: Session = Depends(get_db)
+):
+    """Return AI-generated PWHL trend articles (public, no auth required)."""
+    offset = (page - 1) * page_size
+    total = db.query(NewsArticle).filter(
+        NewsArticle.url.like("%unsupervisedbias.com/trends/%")
+    ).count()
+    articles = (
+        db.query(NewsArticle)
+        .filter(NewsArticle.url.like("%unsupervisedbias.com/trends/%"))
+        .order_by(NewsArticle.date_str.desc(), NewsArticle.scraped_at.desc())
+        .offset(offset)
+        .limit(page_size)
+        .all()
+    )
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "articles": [
+            {
+                "id": a.id,
+                "title": a.title,
+                "url": a.url,
+                "summary": a.summary,
+                "thumbnail": a.thumbnail or a.fallback_image,
+                "date": a.date_str,
+            }
+            for a in articles
+        ],
+    }
+
+
 @router.get("/news")
 async def get_news(db: Session = Depends(get_db)):
     """Serve news from DB cache (populated by scrape_news.py every 4h)."""
