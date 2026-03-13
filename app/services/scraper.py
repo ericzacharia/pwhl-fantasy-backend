@@ -577,6 +577,7 @@ async def run_full_scrape(db) -> dict:
                     db.add(game)
                 else:
                     existing.status = status
+                    existing.season = "2025-2026"   # correct any mis-tagged rows
                     existing.home_score = _int(g.get("HomeGoals", 0))
                     existing.away_score = _int(g.get("VisitorGoals", 0))
                     existing.period = period
