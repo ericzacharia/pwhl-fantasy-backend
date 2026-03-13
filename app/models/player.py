@@ -38,7 +38,7 @@ class PlayerStats(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     player_id = Column(Integer, ForeignKey("players.id"), index=True)
-    season = Column(String(9), nullable=False)  # e.g., "2024-2025"
+    season = Column(String(20), nullable=False)  # e.g., "2025-playoffs"
     game_id = Column(Integer, ForeignKey("games.id"), nullable=True)
 
     # Skater stats

@@ -9,7 +9,7 @@ class Game(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     pwhl_game_id = Column(String, unique=True, index=True)
-    season = Column(String(9), nullable=False)
+    season = Column(String(20), nullable=False)
     game_date = Column(Date, nullable=False)
     game_time = Column(DateTime(timezone=True))
     home_team_id = Column(Integer, ForeignKey("pwhl_teams.id"))
