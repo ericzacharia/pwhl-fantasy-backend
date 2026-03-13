@@ -565,11 +565,16 @@ async def run_full_scrape(db) -> dict:
 
                 # Detect OT/SO from period name or period number
                 period_name = g.get("PeriodNameShort", "")
-                is_overtime = period_name in ("OT", "4") or period == 4
-                is_shootout = period_name in ("SO", "5") or period == 5
-                # OT and SO are mutually exclusive
-                if is_shootout:
-                    is_overtime = False
+                is_playoffs = "playoffs" in season_label
+                if is_playoffs:
+                    # No shootouts in playoffs; any period > 3 is OT
+                    is_overtime = period is not None and period > 3
+                    is_shootout = False
+                else:
+                    is_overtime = period_name in ("OT", "4") or period == 4
+                    is_shootout = period_name in ("SO", "5") or period == 5
+                    if is_shootout:
+                        is_overtime = False
 
                 season_label = _season_from_date(game_date)
 

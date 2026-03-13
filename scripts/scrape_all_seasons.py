@@ -51,11 +51,15 @@ async def run():
         except: continue
 
         period = int(g.get("Period") or 0)
-        is_ot = period == 4
-        is_so = period == 5
         period_name = g.get("PeriodNameShort", "")
-        if period_name in ("OT", "4"): is_ot = True
-        if period_name in ("SO", "5"): is_ot, is_so = False, True
+        is_playoffs = "playoffs" in season
+        if is_playoffs:
+            is_ot = period > 3
+            is_so = False
+        else:
+            is_ot = period == 4 or period_name in ("OT", "4")
+            is_so = period == 5 or period_name in ("SO", "5")
+            if is_so: is_ot = False
 
         vals = dict(season=season, game_date=gd,
                     home_team_id=ht.id if ht else None,
