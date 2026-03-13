@@ -169,6 +169,7 @@ async def get_ai_articles(
                 "summary": a.summary,
                 "thumbnail": a.thumbnail or a.fallback_image,
                 "date": a.date_str,
+                "author_avatar": a.player_image_url,
             }
             for a in articles
         ],
